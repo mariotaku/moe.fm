@@ -1,0 +1,21 @@
+<resources>
+
+	<style name="Widget.ActionBar.Default" parent="android:Widget.Holo.Light.ActionBar.Solid.Inverse">
+		<item name="android:background">@drawable/ab_default_holo</item>
+	</style>
+
+	<style name="Widget.ActionBar.Sandy" parent="android:Widget.Holo.Light.ActionBar.Solid.Inverse">
+		<item name="android:background">@drawable/ab_sandy_holo</item>
+	</style>
+
+	<style name="Widget.ActionBar.Graphite" parent="android:Widget.Holo.Light.ActionBar.Solid.Inverse">
+		<item name="android:background">@drawable/ab_graphited_holo</item>
+	</style>
+
+	<style name="Widget.ActionBar.Wood" parent="android:Widget.Holo.Light.ActionBar.Solid">
+		<item name="android:background">@drawable/ab_woody_holo</item>
+	</style>
+
+	<style name="Widget.ActionBar.Gray" parent="android:Widget.Holo.Light.ActionBar.Solid"/>
+
+</resources>

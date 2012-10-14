@@ -1,0 +1,94 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:padding="@dimen/padding_large">
+
+	<TextView
+		android:id="@+id/title"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentLeft="true"
+		android:layout_alignParentRight="true"
+		android:layout_alignParentTop="true"
+		android:ellipsize="marquee"
+		android:gravity="center"
+		android:singleLine="true"
+		android:textAppearance="?android:attr/textAppearanceLarge">
+
+		<requestFocus/>
+	</TextView>
+
+	<ImageView
+		android:id="@+id/album_cover"
+		android:layout_width="@dimen/album_cover_size"
+		android:layout_height="@dimen/album_cover_size"
+		android:layout_below="@+id/title"
+		android:layout_centerHorizontal="true"
+		android:layout_marginTop="@dimen/padding_small"
+		android:background="@drawable/ic_album_cover"/>
+
+	<TextView
+		android:id="@+id/artist"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentLeft="true"
+		android:layout_alignParentRight="true"
+		android:layout_below="@+id/album_cover"
+		android:layout_marginTop="@dimen/padding_small"
+		android:gravity="center"
+		android:singleLine="true"
+		android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+	<LinearLayout
+		android:id="@+id/play_controls"
+		android:layout_width="match_parent"
+		android:layout_height="56dp"
+		android:layout_above="@+id/player_progress"
+		android:layout_alignParentLeft="true">
+
+		<ImageButton
+			android:id="@+id/favorite"
+			android:layout_width="0dp"
+			android:layout_height="match_parent"
+			android:layout_weight="1"
+			android:background="@android:color/transparent"
+			android:scaleType="fitCenter"
+			android:src="@drawable/btn_heart"/>
+
+		<ImageButton
+			android:id="@+id/play_pause"
+			android:layout_width="0dp"
+			android:layout_height="match_parent"
+			android:layout_weight="1"
+			android:background="@android:color/transparent"
+			android:scaleType="fitCenter"
+			android:src="@drawable/btn_play"/>
+
+		<fm.moe.android.view.RepeatingImageButton
+			android:id="@+id/next_fwd"
+			android:layout_width="0dp"
+			android:layout_height="match_parent"
+			android:layout_weight="1"
+			android:background="@android:color/transparent"
+			android:scaleType="fitCenter"
+			android:src="@drawable/btn_next"/>
+
+		<ImageButton
+			android:id="@+id/trash"
+			android:layout_width="0dp"
+			android:layout_height="match_parent"
+			android:layout_weight="1"
+			android:background="@android:color/transparent"
+			android:scaleType="fitCenter"
+			android:src="@drawable/btn_trash"/>
+	</LinearLayout>
+
+	<ProgressBar
+		android:id="@+id/player_progress"
+		style="?android:attr/progressBarStyleHorizontal"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_alignParentBottom="true"
+		android:max="100"/>
+
+</RelativeLayout>

@@ -1,0 +1,34 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+	<style name="Theme" parent="android:Theme.Holo.Light.DarkActionBar"/>
+
+	<style name="Theme.Initial" parent="android:Theme.Holo.Light.NoActionBar">
+		<item name="android:windowBackground">@drawable/background_light_holo_tile</item>
+	</style>
+
+	<style name="Theme.Default">
+		<item name="android:actionBarStyle">@style/Widget.ActionBar.Default</item>
+		<item name="android:windowBackground">@drawable/background_light_holo_tile</item>
+	</style>
+
+	<style name="Theme.Graphited">
+		<item name="android:actionBarStyle">@style/Widget.ActionBar.Graphite</item>
+		<item name="android:windowBackground">@drawable/background_light_holo_tile</item>
+	</style>
+
+	<style name="Theme.Sandy">
+		<item name="android:actionBarStyle">@style/Widget.ActionBar.Sandy</item>
+		<item name="android:windowBackground">@drawable/background_light_holo_tile</item>
+	</style>
+
+	<style name="Theme.Woody" parent="android:Theme.Holo.Light">
+		<item name="android:actionBarStyle">@style/Widget.ActionBar.Wood</item>
+		<item name="android:windowBackground">@drawable/background_light_holo_tile</item>
+	</style>
+
+	<style name="Theme.Gray" parent="android:Theme.Holo.Light">
+		<item name="android:actionBarStyle">@style/Widget.ActionBar.Gray</item>
+		<item name="android:windowBackground">@drawable/background_light_holo_tile</item>
+	</style>
+
+</resources>

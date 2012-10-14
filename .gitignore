@@ -14,3 +14,14 @@ gen/
 
 # Local configuration file (sdk path, etc)
 local.properties
+
+# For AIDE testing
+libs/maps.jar
+
+# Backup files
+*.bak
+*.old
+*.*~
+
+# Private constants
+src/org/mariotaku/twidere/PrivateConstants.java
