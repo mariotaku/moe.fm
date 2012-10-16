@@ -19,7 +19,8 @@
 		android:theme="@style/Theme.Initial">
 		<activity
 			android:name=".activity.NowPlayingActivity"
-			android:label="@string/now_playing">
+			android:label="@string/now_playing"
+			android:launchMode="singleTask">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN"/>
 

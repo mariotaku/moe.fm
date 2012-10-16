@@ -1,6 +1,5 @@
 package fm.moe.android.activity;
 
-import moefou4j.Cover;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -12,7 +11,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
 import android.media.AudioManager;
 import android.os.Bundle;
@@ -23,8 +21,6 @@ import android.os.SystemClock;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -36,20 +32,26 @@ import fm.moe.android.service.MoefouService;
 import fm.moe.android.util.LazyImageLoader;
 import fm.moe.android.util.MediaPlayerStateListener;
 import fm.moe.android.util.ServiceUtils;
-import fm.moe.android.util.ServiceUtils.ServiceToken;
 import fm.moe.android.util.ThemeUtil;
+import fm.moe.android.util.Utils;
 import fm.moe.android.view.RepeatingImageButton;
-import fm.moe.android.view.RepeatingImageButton.OnRepeatListener;
+import moefou4j.Moefou;
+import moefou4j.MoefouException;
+import moefou4j.Playlist;
+import moefou4j.PlaylistItem;
+import android.util.Log;
+import moefou4j.internal.http.HttpResponse;
+import fm.moe.android.util.JSONFileHelper;
 
-public class NowPlayingActivity extends BaseActivity implements OnClickListener, OnSharedPreferenceChangeListener,
-		ServiceConnection, OnRepeatListener {
+public class NowPlayingActivity extends BaseActivity implements View.OnClickListener, SharedPreferences.OnSharedPreferenceChangeListener,
+ServiceConnection, RepeatingImageButton.OnRepeatListener {
 
 	private SharedPreferences mPreferences;
 	private IMoefouService mService;
 	private LazyImageLoader mCoverLoader;
 
 	private ParcelablePlaylistItem mCurrentPlaylistItem;
-	private ServiceToken mToken;
+	private ServiceUtils.ServiceToken mToken;
 
 	private ImageView mAlbumCoverView;
 	private ImageButton mPlayPauseButton;
@@ -128,18 +130,18 @@ public class NowPlayingActivity extends BaseActivity implements OnClickListener,
 	public void onClick(final View v) {
 		switch (v.getId()) {
 			case R.id.play_pause: {
-				togglePlayPause();
-				break;
-			}
-			case R.id.next_fwd: {
-				if (mService == null) return;
-				try {
-					mService.playShuffle();
-				} catch (RemoteException e) {
-					e.printStackTrace();
+					togglePlayPause();
+					break;
 				}
-				break;
-			}
+			case R.id.next_fwd: {
+					if (mService == null) return;
+					try {
+						mService.next();
+					} catch (RemoteException e) {
+						e.printStackTrace();
+					}
+					break;
+				}
 		}
 	}
 
@@ -157,16 +159,15 @@ public class NowPlayingActivity extends BaseActivity implements OnClickListener,
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
 		setTheme(ThemeUtil.getTheme(this));
-		requestWindowFeature(Window.FEATURE_PROGRESS);
 		mPreferences = getSharedPreferences(SHARED_PREFERENCES_NAME, MODE_PRIVATE);
 		super.onCreate(savedInstanceState);
 		final Resources res = getResources();
 		mCoverLoader = new LazyImageLoader(this, "album_covers", R.drawable.ic_mp_albumart_unknown,
-				res.getDimensionPixelSize(R.dimen.album_cover_size),
-				res.getDimensionPixelSize(R.dimen.album_cover_size), 3);
+										   res.getDimensionPixelSize(R.dimen.album_cover_size),
+										   res.getDimensionPixelSize(R.dimen.album_cover_size), 3);
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		if (mPreferences.getString(PREFERENCE_KEY_ACCESS_TOKEN, null) == null
-				|| mPreferences.getString(PREFERENCE_KEY_ACCESS_TOKEN_SECRET, null) == null) {
+			|| mPreferences.getString(PREFERENCE_KEY_ACCESS_TOKEN_SECRET, null) == null) {
 			finish();
 			startActivity(new Intent(this, LoginActivity.class));
 			return;
@@ -185,47 +186,59 @@ public class NowPlayingActivity extends BaseActivity implements OnClickListener,
 	}
 
 	@Override
+	public void onDestroy() {
+		try {
+			if (mService != null && !mService.isPlaying()) {
+				mService.quit();
+			}
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		super.onDestroy();
+	}
+	
+	@Override
 	public boolean onOptionsItemSelected(final MenuItem item) {
 		switch (item.getItemId()) {
 			case R.id.theme_default: {
-				ThemeUtil.setTheme(this, "default");
-				break;
-			}
-			case R.id.theme_gray: {
-				ThemeUtil.setTheme(this, "gray");
-				break;
-			}
-			case R.id.theme_sandy: {
-				ThemeUtil.setTheme(this, "sandy");
-				break;
-			}
-			case R.id.theme_woody: {
-				ThemeUtil.setTheme(this, "woody");
-				break;
-			}
-			case R.id.theme_graphited: {
-				ThemeUtil.setTheme(this, "graphited");
-				break;
-			}
-			case R.id.settings: {
-				startActivity(new Intent(this, SettingsActivity.class));
-				return true;
-			}
-			case R.id.logout: {
-				new LogoutConfirmDialogFragment().show(getFragmentManager(), "logout_confirm");
-				return true;
-			}
-			case R.id.quit: {
-				finish();
-				if (mService != null) {
-					try {
-						mService.quit();
-					} catch (RemoteException e) {
-						e.printStackTrace();
-					}
+					ThemeUtil.setTheme(this, "default");
+					break;
 				}
-				return true;
-			}
+			case R.id.theme_gray: {
+					ThemeUtil.setTheme(this, "gray");
+					break;
+				}
+			case R.id.theme_sandy: {
+					ThemeUtil.setTheme(this, "sandy");
+					break;
+				}
+			case R.id.theme_woody: {
+					ThemeUtil.setTheme(this, "woody");
+					break;
+				}
+			case R.id.theme_graphited: {
+					ThemeUtil.setTheme(this, "graphited");
+					break;
+				}
+			case R.id.settings: {
+					startActivity(new Intent(this, SettingsActivity.class));
+					return true;
+				}
+			case R.id.logout: {
+					new LogoutConfirmDialogFragment().show(getFragmentManager(), "logout_confirm");
+					return true;
+				}
+			case R.id.quit: {
+					finish();
+					if (mService != null) {
+						try {
+							mService.quit();
+						} catch (RemoteException e) {
+							e.printStackTrace();
+						}
+					}
+					return true;
+				}
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -236,25 +249,25 @@ public class NowPlayingActivity extends BaseActivity implements OnClickListener,
 		final MenuItem theme_item;
 		switch (theme_res) {
 			case R.style.Theme_Gray: {
-				theme_item = menu.findItem(R.id.theme_gray);
-				break;
-			}
+					theme_item = menu.findItem(R.id.theme_gray);
+					break;
+				}
 			case R.style.Theme_Sandy: {
-				theme_item = menu.findItem(R.id.theme_sandy);
-				break;
-			}
+					theme_item = menu.findItem(R.id.theme_sandy);
+					break;
+				}
 			case R.style.Theme_Woody: {
-				theme_item = menu.findItem(R.id.theme_woody);
-				break;
-			}
+					theme_item = menu.findItem(R.id.theme_woody);
+					break;
+				}
 			case R.style.Theme_Graphited: {
-				theme_item = menu.findItem(R.id.theme_graphited);
-				break;
-			}
+					theme_item = menu.findItem(R.id.theme_graphited);
+					break;
+				}
 			default: {
-				theme_item = menu.findItem(R.id.theme_default);
-				break;
-			}
+					theme_item = menu.findItem(R.id.theme_default);
+					break;
+				}
 		}
 		theme_item.setChecked(true);
 		return super.onPrepareOptionsMenu(menu);
@@ -363,10 +376,7 @@ public class NowPlayingActivity extends BaseActivity implements OnClickListener,
 				mArtistView.setText(null);
 				return;
 			}
-			final Cover cover = item.getCover();
-			if (cover != null) {
-				mCoverLoader.displayImage(cover.getSquare(), mAlbumCoverView);
-			}
+			mCoverLoader.displayImage(item.getCoverUrl(), mAlbumCoverView);
 			mTitleView.setText(item.getTitle());
 			mArtistView.setText(item.getArtist());
 		} catch (final RemoteException e) {
@@ -380,14 +390,14 @@ public class NowPlayingActivity extends BaseActivity implements OnClickListener,
 		public void onClick(final DialogInterface dialog, final int which) {
 			switch (which) {
 				case DialogInterface.BUTTON_POSITIVE: {
-					final SharedPreferences.Editor editor = getActivity().getSharedPreferences(SHARED_PREFERENCES_NAME,
-							MODE_PRIVATE).edit();
-					editor.putString(PREFERENCE_KEY_ACCESS_TOKEN, null);
-					editor.putString(PREFERENCE_KEY_ACCESS_TOKEN_SECRET, null);
-					editor.apply();
-					getActivity().finish();
-					break;
-				}
+						final SharedPreferences.Editor editor = getActivity().getSharedPreferences(SHARED_PREFERENCES_NAME,
+																								   MODE_PRIVATE).edit();
+						editor.putString(PREFERENCE_KEY_ACCESS_TOKEN, null);
+						editor.putString(PREFERENCE_KEY_ACCESS_TOKEN_SECRET, null);
+						editor.apply();
+						getActivity().finish();
+						break;
+					}
 			}
 
 		}

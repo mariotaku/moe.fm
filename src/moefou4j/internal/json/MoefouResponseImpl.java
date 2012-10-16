@@ -50,7 +50,11 @@ import org.json.JSONObject;
 	}
 
 	public MoefouResponseImpl(final HttpResponse res) throws MoefouException {
-		init(res);
+		this(res.asJSONObject());
+	}
+	
+	public MoefouResponseImpl(final JSONObject json) throws MoefouException {
+		init(json);
 	}
 
 	@Override
@@ -58,8 +62,12 @@ import org.json.JSONObject;
 		return information;
 	}
 
-	private void init(final HttpResponse res) throws MoefouException {
-		information = new InformationImpl(res);
+	private void init(final JSONObject json) throws MoefouException {
+		try {
+			information = new InformationImpl(json.getJSONObject("response"));
+		} catch (MoefouException e) {} catch (JSONException e) {
+			throw new MoefouException(e);
+		}
 	}
 
 	static class InformationImpl implements Information {
@@ -70,8 +78,10 @@ import org.json.JSONObject;
 		private String[] messages;
 		private String request;
 
-		public InformationImpl(final JSONObject json) throws MoefouException {
+		public InformationImpl(final JSONObject resp_json) throws MoefouException {
+			if (resp_json == null) return;
 			try {
+				final JSONObject json = resp_json.getJSONObject("information");
 				hasError = getBoolean("has_error", json);
 				if (!json.isNull("msg")) {
 					final JSONArray msg_json = json.getJSONArray("msg");
@@ -95,10 +105,6 @@ import org.json.JSONObject;
 			} catch (final JSONException jsone) {
 				throw new MoefouException(jsone);
 			}
-		}
-
-		InformationImpl(final HttpResponse resp) throws MoefouException {
-			this(resp.asJSONObject());
 		}
 
 		@Override

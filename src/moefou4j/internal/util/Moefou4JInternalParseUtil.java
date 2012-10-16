@@ -163,9 +163,11 @@ public final class Moefou4JInternalParseUtil {
 	}
 
 	public static URL getURLFromString(final String name, final JSONObject json) {
+		final String url = getRawString(name, json);
 		try {
-			return new URL(getRawString(name, json));
+			return new URL(url);
 		} catch (final MalformedURLException e) {
+			//System.err.println("Invalid URL " + url);
 		}
 		return null;
 	}

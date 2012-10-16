@@ -22,21 +22,31 @@ import moefou4j.MoefouException;
 import moefou4j.ResponseList;
 import moefou4j.internal.http.HttpResponse;
 import moefou4j.internal.json.MoefouResponseImpl.InformationImpl;
+import org.json.JSONObject;
+import org.json.JSONException;
 
 /**
  * @author Yusuke Yamamoto - yusuke at mac.com
  * @since Twitter4J 2.1.3
  */
-class ResponseListImpl<T> extends ArrayList<T> implements ResponseList<T> {
+class ResponseListJSONImpl<T> extends ArrayList<T> implements ResponseList<T> {
 	private static final long serialVersionUID = -7789068763212377625L;
 
 	private Information information;
 
-	ResponseListImpl(final HttpResponse res) throws MoefouException {
+	ResponseListJSONImpl() {
 		super();
-		init(res);
+	}
+	
+	ResponseListJSONImpl(final HttpResponse res) throws MoefouException {
+		this(res.asJSONObject());
 	}
 
+	ResponseListJSONImpl(final JSONObject json) throws MoefouException {
+		super();
+		init(json);
+	}
+	
 	@Override
 	public Information getInformation() {
 		return information;
@@ -47,7 +57,12 @@ class ResponseListImpl<T> extends ArrayList<T> implements ResponseList<T> {
 		return "ResponseListImpl{information=" + information + ", items=" + super.toString() + "}";
 	}
 
-	private void init(final HttpResponse res) throws MoefouException {
-		information = new InformationImpl(res);
+	private void init(final JSONObject json) throws MoefouException {
+		try {
+			final JSONObject response_json = json.getJSONObject("response");
+			information = new InformationImpl(response_json);
+		} catch (JSONException e) {
+			throw new MoefouException(e);
+		}
 	}
 }

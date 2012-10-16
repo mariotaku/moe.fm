@@ -194,19 +194,4 @@ public class PlaylistItemJSONImpl implements PlaylistItem {
 				+ ", fileSize=" + fileSize + ", fileType=" + fileType + "}";
 	}
 
-	public static ResponseList<PlaylistItem> createPlayList(final HttpResponse res, final String json_key)
-			throws MoefouException {
-		try {
-			final ResponseList<PlaylistItem> list = new ResponseListImpl<PlaylistItem>(res);
-			final JSONArray wikis_json = res.asJSONObject().getJSONObject("response").getJSONArray(json_key);
-			if (wikis_json == null) throw new MoefouException("Unknown response value!");
-			final int length = wikis_json.length();
-			for (int i = 0; i < length; i++) {
-				list.add(new PlaylistItemJSONImpl(wikis_json.getJSONObject(i)));
-			}
-			return list;
-		} catch (final JSONException e) {
-			throw new MoefouException(e);
-		}
-	}
 }

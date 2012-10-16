@@ -27,8 +27,8 @@ public class Paging implements Serializable {
 	}
 
 	public Paging setPerPage(final int perPage) {
-		if (page <= 0 || page > 50)
-			throw new IllegalArgumentException("perPage should be greater than 0 and lesser than 50!");
+		if (page <= 0)
+			throw new IllegalArgumentException("perPage should be greater than 0!");
 		this.perPage = perPage;
 		return this;
 	}

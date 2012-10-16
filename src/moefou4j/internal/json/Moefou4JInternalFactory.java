@@ -17,7 +17,7 @@
 package moefou4j.internal.json;
 
 import moefou4j.MoefouException;
-import moefou4j.PlaylistItem;
+import moefou4j.Playlist;
 import moefou4j.ResponseList;
 import moefou4j.Wiki;
 import moefou4j.internal.http.HttpResponse;
@@ -28,7 +28,7 @@ import moefou4j.internal.http.HttpResponse;
  */
 public interface Moefou4JInternalFactory {
 
-	public ResponseList<PlaylistItem> createPlayist(HttpResponse res, String playlist_key) throws MoefouException;
+	public Playlist createPlayist(HttpResponse res, String playlist_key) throws MoefouException;
 
 	public ResponseList<Wiki> createWikisList(HttpResponse res, String wikis_key) throws MoefouException;
 

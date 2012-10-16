@@ -1,14 +1,13 @@
 package fm.moe.android.model;
 
-import java.net.URL;
-
-import moefou4j.Cover;
-import moefou4j.Favorite;
-import moefou4j.PlaylistItem;
-import moefou4j.Sub;
-import moefou4j.Wiki;
 import android.os.Parcel;
 import android.os.Parcelable;
+import java.net.MalformedURLException;
+import java.net.URL;
+import moefou4j.Cover;
+import moefou4j.PlaylistItem;
+import org.json.JSONObject;
+import org.json.JSONException;
 
 public final class ParcelablePlaylistItem implements Parcelable {
 
@@ -24,143 +23,101 @@ public final class ParcelablePlaylistItem implements Parcelable {
 		}
 	};
 
-	final PlaylistItem item;
+
+	private final String artist;
+
+	private final URL coverUrl;
+
+	private final String title;
+
+	private final long upId;
+
+	private final URL url;
 
 	public ParcelablePlaylistItem(final PlaylistItem item) {
-		this.item = item;
+		upId = item.getUpId();
+		url = item.getUrl();
+		title = item.getTitle();
+		artist = item.getArtist();
+		final Cover cover = item != null ? item.getCover() : null;
+		coverUrl = cover != null ? cover.getSquare() : null;
 	}
 
 	private ParcelablePlaylistItem(final Parcel in) {
-		item = (PlaylistItem) in.readSerializable();
+		upId = in.readLong();
+		url = parseUrl(in.readString());
+		title = in.readString();
+		artist = in.readString();
+		coverUrl = parseUrl(in.readString());
 	}
 
+	private static URL parseUrl(String url) {
+		if (url == null) return null;
+		try {
+			return new URL(url);
+		} catch (MalformedURLException e) {
+			return null;
+		}
+	}
+	
+	private static String toString(Object object) {
+		return object != null ? object.toString() : null;
+	}
+	
 	@Override
 	public int describeContents() {
 		return 0;
 	}
 
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (!(obj instanceof ParcelablePlaylistItem)) return false;
-		final ParcelablePlaylistItem other = (ParcelablePlaylistItem) obj;
-		if (item == null) {
-			if (other.item != null) return false;
-		} else if (!item.equals(other.item)) return false;
-		return true;
-	}
 
 	public String getArtist() {
-		return item.getArtist();
+		return artist;
 	}
 
-	public Cover getCover() {
-		return item.getCover();
-	}
-
-	public Favorite getFavoriteSub() {
-		return item.getFavoriteSub();
-
-	}
-
-	public Favorite getFavoriteWiki() {
-		return item.getFavoriteWiki();
-
-	}
-
-	/**
-	 * @return 媒体文件的大小，单位是KB
-	 */
-	public int getFileSize() {
-		return item.getFileSize();
-	}
-
-	public String getFileType() {
-		return item.getFileType();
-	}
-
-	public PlaylistItem getPlaylistItem() {
-		return item;
-	}
-
-	/**
-	 * @return 媒体的时间，以秒计
-	 */
-	public int getStreamLength() {
-		return item.getStreamLength();
-	}
-
-	/**
-	 * @return 人类可读的媒体时间
-	 */
-	public String getStreamTime() {
-		return item.getStreamTime();
-	}
-
-	public long getSubId() {
-		return item.getSubId();
-	}
-
-	public String getSubTitle() {
-		return item.getSubTitle();
-	}
-
-	public Sub.Type getSubType() {
-		return item.getSubType();
-	}
-
-	public URL getSubUrl() {
-		return item.getSubUrl();
+	public URL getCoverUrl() {
+		return coverUrl;
 	}
 
 	public String getTitle() {
-		return item.getTitle();
+		return title;
 	}
 
 	public long getUpId() {
-		return item.getUpId();
+		return upId;
 	}
 
 	/**
 	 * @return 音乐的URL
 	 */
 	public URL getUrl() {
-		return item.getUrl();
-	}
-
-	public long getWikiId() {
-		return item.getWikiId();
-	}
-
-	public String getWikiTitle() {
-		return item.getWikiTitle();
-	}
-
-	public Wiki.Type getWikiType() {
-		return item.getWikiType();
-	}
-
-	public URL getWikiUrl() {
-		return item.getWikiUrl();
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (item == null ? 0 : item.hashCode());
-		return result;
-	}
-
-	@Override
-	public String toString() {
-		return item.toString();
+		return url;
 	}
 
 	@Override
 	public void writeToParcel(final Parcel out, final int flags) {
-		out.writeSerializable(item);
+		out.writeLong(upId);
+		out.writeString(toString(url));
+		out.writeString(title);
+		out.writeString(artist);
+		out.writeString(toString(coverUrl));
 	}
 
+	public JSONObject toJSONObject() throws JSONException {
+		final JSONObject json = new JSONObject();		
+			json.put("upId", upId);
+			json.put("url", toString(url));
+			json.put("title", title);
+			json.put("artist", artist);
+			json.put("coverUrl", coverUrl);
+		
+		return json;
+	}
+	
+	public ParcelablePlaylistItem(JSONObject json) throws JSONException {
+		upId = Long.valueOf(toString(json.get("upId")));
+		url = parseUrl(toString(json.get("url")));
+		title = toString(json.get("title"));
+		artist = toString(json.get("artist"));
+		coverUrl = parseUrl(toString(json.get("coverUrl")));
+	}
 }
