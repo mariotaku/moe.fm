@@ -19,22 +19,23 @@
 
 package fm.moe.android.util;
 
-import android.content.Context;
-import android.os.Environment;
+import static android.os.Environment.getExternalStorageState;
+
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static android.os.Environment.getExternalStorageState;
+import android.content.Context;
+import android.os.Environment;
 
 public class JSONFileHelper {
 
@@ -58,9 +59,9 @@ public class JSONFileHelper {
 	}
 
 	public static JSONObject read(final String path) throws IOException, JSONException {
-		if (path == null) return null;
+		if (path == null) throw new FileNotFoundException();
 		final File file = new File(path);
-		if (!file.isFile()) return null;			
+		if (!file.isFile()) throw new FileNotFoundException();
 		return new JSONObject(readFile(file));
 	}
 
@@ -72,7 +73,7 @@ public class JSONFileHelper {
 		fw.flush();
 		fw.close();
 	}
-	
+
 	private static String readFile(final File file) throws IOException {
 		final FileInputStream stream = new FileInputStream(file);
 		try {
@@ -80,10 +81,9 @@ public class JSONFileHelper {
 			final MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
 			/* Instead of using default, pass in a decoder. */
 			return Charset.defaultCharset().decode(bb).toString();
-		}
-		finally {
+		} finally {
 			stream.close();
 		}
-    }
+	}
 
 }

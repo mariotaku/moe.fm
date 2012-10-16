@@ -17,11 +17,9 @@ interface IMoefouService {
 	void clearQueue();
 	int getCurrentPosition();
 	int getDuration();
-	void playShuffle();
+	void shuffle();
 	List<ParcelablePlaylistItem> getPlaylist();
 	int getQueuePosition();
-	int getItemIndex(in ParcelablePlaylistItem item);
-	ParcelablePlaylistItem findItem(long upId);
 	ParcelablePlaylistItem getCurrentItem();
 	void quit();
 

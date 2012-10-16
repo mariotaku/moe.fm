@@ -17,12 +17,11 @@
 package moefou4j.internal.json;
 
 import moefou4j.MoefouException;
-import moefou4j.PlaylistItem;
+import moefou4j.Playlist;
 import moefou4j.ResponseList;
 import moefou4j.Wiki;
 import moefou4j.conf.Configuration;
 import moefou4j.internal.http.HttpResponse;
-import moefou4j.Playlist;
 
 /**
  * @author Yusuke Yamamoto - yusuke at mac.com
@@ -37,8 +36,7 @@ public class Moefou4JInternalJSONFactoryImpl implements Moefou4JInternalFactory 
 	}
 
 	@Override
-	public Playlist createPlayist(final HttpResponse res, final String json_key)
-			throws MoefouException {
+	public Playlist createPlayist(final HttpResponse res, final String json_key) throws MoefouException {
 		return PlaylistJSONImpl.createPlayList(res, json_key);
 	}
 

@@ -10,11 +10,11 @@ public class NoDuplicatesArrayList<E> extends ArrayList<E> {
 	public NoDuplicatesArrayList() {
 		super();
 	}
-	
-	public NoDuplicatesArrayList(int capacity) {
+
+	public NoDuplicatesArrayList(final int capacity) {
 		super(capacity);
 	}
-	
+
 	@Override
 	public boolean add(final E e) {
 		if (contains(e))

@@ -12,7 +12,6 @@ import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnInfoListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.media.MediaPlayer.OnSeekCompleteListener;
-import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
 import fm.moe.android.Constants;

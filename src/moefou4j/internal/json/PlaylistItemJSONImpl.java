@@ -11,18 +11,17 @@ import moefou4j.Cover;
 import moefou4j.Favorite;
 import moefou4j.MoefouException;
 import moefou4j.PlaylistItem;
-import moefou4j.ResponseList;
 import moefou4j.Sub;
 import moefou4j.Wiki;
 import moefou4j.Wiki.Type;
-import moefou4j.internal.http.HttpResponse;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class PlaylistItemJSONImpl implements PlaylistItem {
 
+	private static final long serialVersionUID = 3866860449112856833L;
+	
 	private long upId;
 	private long wikiId;
 	private String title;

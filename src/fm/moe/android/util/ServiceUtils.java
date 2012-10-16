@@ -34,15 +34,11 @@ public final class ServiceUtils {
 		return null;
 	}
 
-	public static void unbindService(ServiceToken token) {
-		if (token == null) {
-			return;
-		}
-		ContextWrapper cw = token.wrapped_context;
-		ServiceBinder sb = sConnectionMap.remove(cw);
-		if (sb == null) {
-			return;
-		}
+	public static void unbindService(final ServiceToken token) {
+		if (token == null) return;
+		final ContextWrapper cw = token.wrapped_context;
+		final ServiceBinder sb = sConnectionMap.remove(cw);
+		if (sb == null) return;
 		cw.unbindService(sb);
 	}
 

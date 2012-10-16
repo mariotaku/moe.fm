@@ -210,7 +210,7 @@ class WikiJSONImpl implements Wiki {
 	public static ResponseList<Wiki> createWikisList(final HttpResponse res, final String wikis_key)
 			throws MoefouException {
 		try {
-			final ResponseList<Wiki> list = new ResponseListJSONImpl<Wiki>(res);
+			final ResponseList<Wiki> list = new ResponseListImpl<Wiki>(res);
 			final JSONArray wikis_json = res.asJSONObject().getJSONObject("response").getJSONArray(wikis_key);
 			if (wikis_json == null) throw new MoefouException("Unknown response value!");
 			final int length = wikis_json.length();

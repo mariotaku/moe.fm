@@ -1,13 +1,22 @@
 package fm.moe.android.model;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
+
 import moefou4j.Cover;
 import moefou4j.PlaylistItem;
-import org.json.JSONObject;
+
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
+import fm.moe.android.util.JSONFileHelper;
+import fm.moe.android.util.NoDuplicatesArrayList;
 
 public final class ParcelablePlaylistItem implements Parcelable {
 
@@ -23,7 +32,6 @@ public final class ParcelablePlaylistItem implements Parcelable {
 		}
 	};
 
-
 	private final String artist;
 
 	private final URL coverUrl;
@@ -33,6 +41,14 @@ public final class ParcelablePlaylistItem implements Parcelable {
 	private final long upId;
 
 	private final URL url;
+
+	public ParcelablePlaylistItem(final JSONObject json) throws JSONException {
+		upId = Long.valueOf(toString(json.get("upId")));
+		url = parseUrl(toString(json.get("url")));
+		title = toString(json.get("title"));
+		artist = toString(json.get("artist"));
+		coverUrl = parseUrl(toString(json.get("coverUrl")));
+	}
 
 	public ParcelablePlaylistItem(final PlaylistItem item) {
 		upId = item.getUpId();
@@ -51,24 +67,20 @@ public final class ParcelablePlaylistItem implements Parcelable {
 		coverUrl = parseUrl(in.readString());
 	}
 
-	private static URL parseUrl(String url) {
-		if (url == null) return null;
-		try {
-			return new URL(url);
-		} catch (MalformedURLException e) {
-			return null;
-		}
-	}
-	
-	private static String toString(Object object) {
-		return object != null ? object.toString() : null;
-	}
-	
 	@Override
 	public int describeContents() {
 		return 0;
 	}
 
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (!(obj instanceof ParcelablePlaylistItem)) return false;
+		final ParcelablePlaylistItem other = (ParcelablePlaylistItem) obj;
+		if (upId != other.upId) return false;
+		return true;
+	}
 
 	public String getArtist() {
 		return artist;
@@ -94,6 +106,31 @@ public final class ParcelablePlaylistItem implements Parcelable {
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (upId ^ upId >>> 32);
+		return result;
+	}
+
+	public JSONObject toJSONObject() throws JSONException {
+		final JSONObject json = new JSONObject();
+		json.put("upId", upId);
+		json.put("url", toString(url));
+		json.put("title", title);
+		json.put("artist", artist);
+		json.put("coverUrl", coverUrl);
+
+		return json;
+	}
+
+	@Override
+	public String toString() {
+		return "ParcelablePlaylistItem{artist=" + artist + ", coverUrl=" + coverUrl + ", title=" + title + ", upId="
+				+ upId + ", url=" + url + "}";
+	}
+
+	@Override
 	public void writeToParcel(final Parcel out, final int flags) {
 		out.writeLong(upId);
 		out.writeString(toString(url));
@@ -102,22 +139,41 @@ public final class ParcelablePlaylistItem implements Parcelable {
 		out.writeString(toString(coverUrl));
 	}
 
-	public JSONObject toJSONObject() throws JSONException {
-		final JSONObject json = new JSONObject();		
-			json.put("upId", upId);
-			json.put("url", toString(url));
-			json.put("title", title);
-			json.put("artist", artist);
-			json.put("coverUrl", coverUrl);
-		
-		return json;
+	public static List<ParcelablePlaylistItem> createListFromFile(final Context context, final String filename)
+			throws JSONException, IOException {
+		final List<ParcelablePlaylistItem> list = new NoDuplicatesArrayList<ParcelablePlaylistItem>();
+		final JSONObject json = JSONFileHelper.read(JSONFileHelper.getFilePath(context, filename));
+		if (json != null) {
+			final JSONArray array = json.getJSONArray("playlist");
+			final int length = array.length();
+			for (int i = 0; i < length; i++) {
+				list.add(new ParcelablePlaylistItem(array.getJSONObject(i)));
+			}
+		}
+		return list;
 	}
-	
-	public ParcelablePlaylistItem(JSONObject json) throws JSONException {
-		upId = Long.valueOf(toString(json.get("upId")));
-		url = parseUrl(toString(json.get("url")));
-		title = toString(json.get("title"));
-		artist = toString(json.get("artist"));
-		coverUrl = parseUrl(toString(json.get("coverUrl")));
+
+	public static void saveListToFile(final Context context, final String filename,
+			final List<ParcelablePlaylistItem> list) throws JSONException, IOException {
+		final JSONObject json = new JSONObject();
+		final JSONArray array = new JSONArray();
+		for (final ParcelablePlaylistItem item : list) {
+			array.put(item.toJSONObject());
+		}
+		json.put("playlist", array);
+		JSONFileHelper.write(json, JSONFileHelper.getFilePath(context, filename));
+	}
+
+	private static URL parseUrl(final String url) {
+		if (url == null) return null;
+		try {
+			return new URL(url);
+		} catch (final MalformedURLException e) {
+			return null;
+		}
+	}
+
+	private static String toString(final Object object) {
+		return object != null ? object.toString() : null;
 	}
 }

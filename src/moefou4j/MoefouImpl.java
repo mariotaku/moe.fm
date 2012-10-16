@@ -36,12 +36,8 @@ import moefou4j.internal.util.Moefou4JInternalStringUtil;
  */
 final class MoefouImpl extends MoefouBaseImpl implements Moefou {
 
-	public Playlist getNextPlaylist(Playlist.PlaylistInformation info) throws MoefouException {
-		return factory.createPlayist(get(String.valueOf(info.getNextUrl())), "playlist");
-	}
-
-
 	private final HttpParameter PARAM_API;
+
 	private final HttpParameter PARAM_API_KEY;
 
 	/* package */
@@ -53,14 +49,20 @@ final class MoefouImpl extends MoefouBaseImpl implements Moefou {
 	}
 
 	@Override
+	public Playlist getNextPlaylist(final Playlist.PlaylistInformation info) throws MoefouException {
+		return factory.createPlayist(get(String.valueOf(info.getNextUrl())), "playlist");
+	}
+
+	@Override
 	public Playlist getPlaylist() throws MoefouException {
 		return getPlaylist(new Paging());
 	}
-	
+
 	@Override
 	public Playlist getPlaylist(final Paging paging) throws MoefouException {
-		return factory.createPlayist(get(conf.getMoeFMBaseURL() + "listen/playlist", mergeParameters(paging.toHttpParameters(), 
-				PARAM_API)), "playlist");
+		return factory.createPlayist(
+				get(conf.getMoeFMBaseURL() + "listen/playlist", mergeParameters(paging.toHttpParameters(), PARAM_API)),
+				"playlist");
 	}
 
 	@Override

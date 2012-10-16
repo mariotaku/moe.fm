@@ -32,4 +32,6 @@ public interface Constants {
 	public static final String BROADCAST_ON_START = INTENT_ACTION_PREFIX + "ON_START";
 	public static final String BROADCAST_ON_STOP = INTENT_ACTION_PREFIX + "ON_STOP";
 	public static final String BROADCAST_ON_CURRENT_ITEM_CHANGED = INTENT_ACTION_PREFIX + "ON_CURRENT_ITEM_CHANGED";
+
+	public static final int NOTIFICATION_ID_NOW_PLAYING = 1;
 }

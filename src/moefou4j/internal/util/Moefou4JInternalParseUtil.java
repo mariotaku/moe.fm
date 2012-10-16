@@ -167,7 +167,7 @@ public final class Moefou4JInternalParseUtil {
 		try {
 			return new URL(url);
 		} catch (final MalformedURLException e) {
-			//System.err.println("Invalid URL " + url);
+			// System.err.println("Invalid URL " + url);
 		}
 		return null;
 	}

@@ -33,24 +33,15 @@ import fm.moe.android.util.LazyImageLoader;
 import fm.moe.android.util.MediaPlayerStateListener;
 import fm.moe.android.util.ServiceUtils;
 import fm.moe.android.util.ThemeUtil;
-import fm.moe.android.util.Utils;
 import fm.moe.android.view.RepeatingImageButton;
-import moefou4j.Moefou;
-import moefou4j.MoefouException;
-import moefou4j.Playlist;
-import moefou4j.PlaylistItem;
-import android.util.Log;
-import moefou4j.internal.http.HttpResponse;
-import fm.moe.android.util.JSONFileHelper;
 
-public class NowPlayingActivity extends BaseActivity implements View.OnClickListener, SharedPreferences.OnSharedPreferenceChangeListener,
-ServiceConnection, RepeatingImageButton.OnRepeatListener {
+public class NowPlayingActivity extends BaseActivity implements View.OnClickListener,
+		SharedPreferences.OnSharedPreferenceChangeListener, ServiceConnection, RepeatingImageButton.OnRepeatListener {
 
 	private SharedPreferences mPreferences;
 	private IMoefouService mService;
 	private LazyImageLoader mCoverLoader;
 
-	private ParcelablePlaylistItem mCurrentPlaylistItem;
 	private ServiceUtils.ServiceToken mToken;
 
 	private ImageView mAlbumCoverView;
@@ -86,6 +77,8 @@ ServiceConnection, RepeatingImageButton.OnRepeatListener {
 		public void onCompletion(final int audio_session_id) {
 			mProgress.setProgress(0);
 			mProgress.setSecondaryProgress(0);
+			mPlayPauseButton.setImageResource(R.drawable.btn_play);
+			updateNowPlayingInfo();
 		}
 
 		@Override
@@ -105,7 +98,8 @@ ServiceConnection, RepeatingImageButton.OnRepeatListener {
 
 		@Override
 		public void onPrepared(final int audio_session_id) {
-
+			setPlayPauseButton();
+			updateNowPlayingInfo();
 		}
 
 		@Override
@@ -120,7 +114,7 @@ ServiceConnection, RepeatingImageButton.OnRepeatListener {
 
 		@Override
 		public void onStop(final int audio_session_id) {
-			setPlayPauseButton();
+			mPlayPauseButton.setImageResource(R.drawable.btn_play);
 		}
 	};
 
@@ -130,18 +124,18 @@ ServiceConnection, RepeatingImageButton.OnRepeatListener {
 	public void onClick(final View v) {
 		switch (v.getId()) {
 			case R.id.play_pause: {
-					togglePlayPause();
-					break;
-				}
+				togglePlayPause();
+				break;
+			}
 			case R.id.next_fwd: {
-					if (mService == null) return;
-					try {
-						mService.next();
-					} catch (RemoteException e) {
-						e.printStackTrace();
-					}
-					break;
+				if (mService == null) return;
+				try {
+					mService.next();
+				} catch (final RemoteException e) {
+					e.printStackTrace();
 				}
+				break;
+			}
 		}
 	}
 
@@ -163,11 +157,11 @@ ServiceConnection, RepeatingImageButton.OnRepeatListener {
 		super.onCreate(savedInstanceState);
 		final Resources res = getResources();
 		mCoverLoader = new LazyImageLoader(this, "album_covers", R.drawable.ic_mp_albumart_unknown,
-										   res.getDimensionPixelSize(R.dimen.album_cover_size),
-										   res.getDimensionPixelSize(R.dimen.album_cover_size), 3);
+				res.getDimensionPixelSize(R.dimen.album_cover_size),
+				res.getDimensionPixelSize(R.dimen.album_cover_size), 3);
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		if (mPreferences.getString(PREFERENCE_KEY_ACCESS_TOKEN, null) == null
-			|| mPreferences.getString(PREFERENCE_KEY_ACCESS_TOKEN_SECRET, null) == null) {
+				|| mPreferences.getString(PREFERENCE_KEY_ACCESS_TOKEN_SECRET, null) == null) {
 			finish();
 			startActivity(new Intent(this, LoginActivity.class));
 			return;
@@ -191,54 +185,54 @@ ServiceConnection, RepeatingImageButton.OnRepeatListener {
 			if (mService != null && !mService.isPlaying()) {
 				mService.quit();
 			}
-		} catch (RemoteException e) {
+		} catch (final RemoteException e) {
 			e.printStackTrace();
 		}
 		super.onDestroy();
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(final MenuItem item) {
 		switch (item.getItemId()) {
 			case R.id.theme_default: {
-					ThemeUtil.setTheme(this, "default");
-					break;
-				}
+				ThemeUtil.setTheme(this, "default");
+				break;
+			}
 			case R.id.theme_gray: {
-					ThemeUtil.setTheme(this, "gray");
-					break;
-				}
+				ThemeUtil.setTheme(this, "gray");
+				break;
+			}
 			case R.id.theme_sandy: {
-					ThemeUtil.setTheme(this, "sandy");
-					break;
-				}
+				ThemeUtil.setTheme(this, "sandy");
+				break;
+			}
 			case R.id.theme_woody: {
-					ThemeUtil.setTheme(this, "woody");
-					break;
-				}
+				ThemeUtil.setTheme(this, "woody");
+				break;
+			}
 			case R.id.theme_graphited: {
-					ThemeUtil.setTheme(this, "graphited");
-					break;
-				}
+				ThemeUtil.setTheme(this, "graphited");
+				break;
+			}
 			case R.id.settings: {
-					startActivity(new Intent(this, SettingsActivity.class));
-					return true;
-				}
+				startActivity(new Intent(this, SettingsActivity.class));
+				return true;
+			}
 			case R.id.logout: {
-					new LogoutConfirmDialogFragment().show(getFragmentManager(), "logout_confirm");
-					return true;
-				}
+				new LogoutConfirmDialogFragment().show(getFragmentManager(), "logout_confirm");
+				return true;
+			}
 			case R.id.quit: {
-					finish();
-					if (mService != null) {
-						try {
-							mService.quit();
-						} catch (RemoteException e) {
-							e.printStackTrace();
-						}
+				finish();
+				if (mService != null) {
+					try {
+						mService.quit();
+					} catch (final RemoteException e) {
+						e.printStackTrace();
 					}
-					return true;
 				}
+				return true;
+			}
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -249,28 +243,33 @@ ServiceConnection, RepeatingImageButton.OnRepeatListener {
 		final MenuItem theme_item;
 		switch (theme_res) {
 			case R.style.Theme_Gray: {
-					theme_item = menu.findItem(R.id.theme_gray);
-					break;
-				}
+				theme_item = menu.findItem(R.id.theme_gray);
+				break;
+			}
 			case R.style.Theme_Sandy: {
-					theme_item = menu.findItem(R.id.theme_sandy);
-					break;
-				}
+				theme_item = menu.findItem(R.id.theme_sandy);
+				break;
+			}
 			case R.style.Theme_Woody: {
-					theme_item = menu.findItem(R.id.theme_woody);
-					break;
-				}
+				theme_item = menu.findItem(R.id.theme_woody);
+				break;
+			}
 			case R.style.Theme_Graphited: {
-					theme_item = menu.findItem(R.id.theme_graphited);
-					break;
-				}
+				theme_item = menu.findItem(R.id.theme_graphited);
+				break;
+			}
 			default: {
-					theme_item = menu.findItem(R.id.theme_default);
-					break;
-				}
+				theme_item = menu.findItem(R.id.theme_default);
+				break;
+			}
 		}
 		theme_item.setChecked(true);
 		return super.onPrepareOptionsMenu(menu);
+	}
+
+	@Override
+	public void onRepeat(final View v, final long duration, final int repeatcount) {
+
 	}
 
 	@Override
@@ -367,7 +366,7 @@ ServiceConnection, RepeatingImageButton.OnRepeatListener {
 	private void updateNowPlayingInfo() {
 		if (mService == null) return;
 		try {
-			final ParcelablePlaylistItem item = mCurrentPlaylistItem = mService.getCurrentItem();
+			final ParcelablePlaylistItem item = mService.getCurrentItem();
 			mProgress.setProgress(0);
 			mProgress.setSecondaryProgress(0);
 			if (item == null) {
@@ -390,14 +389,14 @@ ServiceConnection, RepeatingImageButton.OnRepeatListener {
 		public void onClick(final DialogInterface dialog, final int which) {
 			switch (which) {
 				case DialogInterface.BUTTON_POSITIVE: {
-						final SharedPreferences.Editor editor = getActivity().getSharedPreferences(SHARED_PREFERENCES_NAME,
-																								   MODE_PRIVATE).edit();
-						editor.putString(PREFERENCE_KEY_ACCESS_TOKEN, null);
-						editor.putString(PREFERENCE_KEY_ACCESS_TOKEN_SECRET, null);
-						editor.apply();
-						getActivity().finish();
-						break;
-					}
+					final SharedPreferences.Editor editor = getActivity().getSharedPreferences(SHARED_PREFERENCES_NAME,
+							MODE_PRIVATE).edit();
+					editor.putString(PREFERENCE_KEY_ACCESS_TOKEN, null);
+					editor.putString(PREFERENCE_KEY_ACCESS_TOKEN_SECRET, null);
+					editor.apply();
+					getActivity().finish();
+					break;
+				}
 			}
 
 		}
@@ -410,11 +409,6 @@ ServiceConnection, RepeatingImageButton.OnRepeatListener {
 			builder.setNegativeButton(android.R.string.cancel, null);
 			return builder.create();
 		}
-
-	}
-
-	@Override
-	public void onRepeat(View v, long duration, int repeatcount) {
 
 	}
 }

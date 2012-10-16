@@ -52,7 +52,7 @@ import org.json.JSONObject;
 	public MoefouResponseImpl(final HttpResponse res) throws MoefouException {
 		this(res.asJSONObject());
 	}
-	
+
 	public MoefouResponseImpl(final JSONObject json) throws MoefouException {
 		init(json);
 	}
@@ -65,7 +65,8 @@ import org.json.JSONObject;
 	private void init(final JSONObject json) throws MoefouException {
 		try {
 			information = new InformationImpl(json.getJSONObject("response"));
-		} catch (MoefouException e) {} catch (JSONException e) {
+		} catch (final MoefouException e) {
+		} catch (final JSONException e) {
 			throw new MoefouException(e);
 		}
 	}
@@ -73,10 +74,10 @@ import org.json.JSONObject;
 	static class InformationImpl implements Information {
 
 		private static final long serialVersionUID = -606811929444784275L;
-		private boolean hasError;
-		private HashMap<String, String> parameters;
-		private String[] messages;
-		private String request;
+		boolean hasError;
+		HashMap<String, String> parameters;
+		String[] messages;
+		String request;
 
 		public InformationImpl(final JSONObject resp_json) throws MoefouException {
 			if (resp_json == null) return;
