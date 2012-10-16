@@ -9,9 +9,10 @@
 	<string name="theme_gray">浅灰</string>
 	<string name="theme_woody">木材</string>
 	<string name="theme_graphited">石墨</string>
-	<string name="error_occurred">发生了一个错误，请稍候再试～</string>
+	<string name="error_occurred">在和萌否娘联系的过程中发生了一个错误，请稍候再试～</string>
 	<string name="login">登录</string>
-	<string name="logout">登出</string>
-	<string name="logout_confirm">确定要登出吗？</string>
+	<string name="logout">注销</string>
+	<string name="logout_confirm">确定要注销吗？</string>
+	<string name="quit">退出</string>
 
 </resources>
