@@ -625,10 +625,10 @@ public class MoefouService extends Service implements Constants {
 				.synchronizedList(new NoDuplicatesArrayList<ParcelablePlaylistItem>());
 		private int mPosition = -1;
 
-		private boolean mPlayingHistory;
-		private ParcelablePlaylistItem mCurrentItem;
+		private boolean is_playing_history;
+		private ParcelablePlaylistItem current;
 
-		private GetPlaylistTask mTask;
+		private GetPlaylistTask task;
 
 		private final PlaylistManager manager;
 
@@ -638,7 +638,7 @@ public class MoefouService extends Service implements Constants {
 			this.manager = manager;
 			try {
 				queue.addAll(ParcelablePlaylistItem.createListFromFile(context, JSON_FILENAME_SITE_SHUFFLE_QUEUE));
-				mCurrentItem = new ParcelablePlaylistItem(JSONFileHelper.read(JSONFileHelper.getFilePath(context,
+				current = new ParcelablePlaylistItem(JSONFileHelper.read(JSONFileHelper.getFilePath(context,
 						JSON_FILENAME_CURRENT_ITEM)));
 			} catch (final JSONException e) {
 				e.printStackTrace();
@@ -655,19 +655,19 @@ public class MoefouService extends Service implements Constants {
 		}
 
 		ParcelablePlaylistItem getCurrentItem() {
-			return mCurrentItem;
+			return current;
 		}
 
 		void getPlaylist() {
-			if (mTask != null) {
-				mTask.cancel(true);
+			if (task != null) {
+				task.cancel(true);
 			}
-			mTask = new GetPlaylistTask(context, queue);
-			mTask.execute();
+			task = new GetPlaylistTask(context, queue);
+			task.execute();
 		}
 
 		boolean hasNext() {
-			return mPlayingHistory || queue.size() > 0;
+			return is_playing_history || queue.size() > 0;
 		}
 
 		boolean next(final boolean play_now) {
@@ -675,7 +675,7 @@ public class MoefouService extends Service implements Constants {
 			if (mPosition == -1 || mPosition >= history.size() - 1) {
 				// 没有在播放之前的曲目或者已经到了历史的最后一条，所以直接从还没播放的列表里随机挑一首
 				mPosition = -1;
-				mPlayingHistory = false;
+				is_playing_history = false;
 				return shuffle(play_now);
 			}
 			mPosition++;
@@ -690,7 +690,7 @@ public class MoefouService extends Service implements Constants {
 			if (mPosition >= history.size() || mPosition < 0) {
 				mPosition = history.size() - 1;
 			}
-			mPlayingHistory = true;
+			is_playing_history = true;
 			mPosition--;
 			final boolean ret = select(history.get(mPosition));
 			return play_now ? manager.prepare() : ret;
@@ -701,7 +701,7 @@ public class MoefouService extends Service implements Constants {
 		}
 
 		boolean select(final ParcelablePlaylistItem item) {
-			mCurrentItem = item;
+			current = item;
 			if (item == null) return false;
 			context.sendBroadcast(new Intent(BROADCAST_ON_CURRENT_ITEM_CHANGED));
 			return manager.isPlaying() ? manager.play(-1) : manager.load(-1);
@@ -709,8 +709,9 @@ public class MoefouService extends Service implements Constants {
 
 		boolean shuffle(final boolean play_now) {
 			checkQueue();
-			if (mCurrentItem != null) {
-				history.add(mCurrentItem);
+			if (queue.size() == 0) return false;
+			if (current != null) {
+				history.add(current);
 			}
 			final int random_idx = random.nextInt(queue.size());
 			final ParcelablePlaylistItem item = queue.get(random_idx);

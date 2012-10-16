@@ -67,6 +67,7 @@ public class JSONFileHelper {
 
 	public static void write(final JSONObject object, final String path) throws IOException {
 		if (object == null || path == null) return;
+		new File(path).delete();
 		final RandomAccessFile raf = new RandomAccessFile(path, FILE_MODE_RW);
 		final FileWriter fw = new FileWriter(raf.getFD());
 		fw.write(object.toString());
