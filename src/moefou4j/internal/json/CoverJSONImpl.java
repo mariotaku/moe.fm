@@ -8,7 +8,7 @@ import moefou4j.Cover;
 
 import org.json.JSONObject;
 
-public class CoverJSONImpl implements Cover {
+final class CoverJSONImpl implements Cover {
 
 	private static final long serialVersionUID = -8099123697394227125L;
 	public URL large;

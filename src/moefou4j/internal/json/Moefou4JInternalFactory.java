@@ -31,7 +31,7 @@ public interface Moefou4JInternalFactory {
 
 	public Playlist createPlayist(HttpResponse res, String playlist_key) throws MoefouException;
 
-	public ResponseList<Wiki> createWikisList(HttpResponse res, String wikis_key) throws MoefouException;
+	public ResponseList<Wiki> createWikisList(HttpResponse res) throws MoefouException;
 
 	public ResponseMessage createResponseMessage(HttpResponse res) throws MoefouException;
 	

@@ -18,7 +18,7 @@ import moefou4j.Wiki.Type;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class PlaylistItemJSONImpl implements PlaylistItem {
+final class PlaylistItemJSONImpl implements PlaylistItem {
 
 	private static final long serialVersionUID = 3866860449112856833L;
 	

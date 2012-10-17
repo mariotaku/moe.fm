@@ -52,11 +52,11 @@ public class Moefou4JInternalStringUtil {
 		return buf.toString();
 	}
 
-	public static String join(final String[] track) {
+	public static String join(final String[] track, final char token) {
 		final StringBuilder builder = new StringBuilder();
 		for (final String str : track) {
 			if (0 != builder.length()) {
-				builder.append(",");
+				builder.append(token);
 			}
 			builder.append(str);
 		}

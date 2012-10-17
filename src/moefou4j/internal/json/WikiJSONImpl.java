@@ -207,11 +207,12 @@ class WikiJSONImpl implements Wiki {
 				+ cover + ", userFavorite=" + userFavorite + "}";
 	}
 
-	public static ResponseList<Wiki> createWikisList(final HttpResponse res, final String wikis_key)
+	public static ResponseList<Wiki> createWikisList(final HttpResponse res)
 			throws MoefouException {
 		try {
-			final ResponseList<Wiki> list = new ResponseListImpl<Wiki>(res);
-			final JSONArray wikis_json = res.asJSONObject().getJSONObject("response").getJSONArray(wikis_key);
+					final JSONObject json = res.asJSONObject();
+			final ResponseList<Wiki> list = new ResponseListImpl<Wiki>(json);
+			final JSONArray wikis_json = json.getJSONObject("response").getJSONArray("wikis");
 			if (wikis_json == null) throw new MoefouException("Unknown response value!");
 			final int length = wikis_json.length();
 			for (int i = 0; i < length; i++) {

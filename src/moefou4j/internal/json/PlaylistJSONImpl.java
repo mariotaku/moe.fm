@@ -16,7 +16,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class PlaylistJSONImpl extends ResponseListImpl<PlaylistItem> implements Playlist {
+final class PlaylistJSONImpl extends ResponseListImpl<PlaylistItem> implements Playlist {
 
 	private static final long serialVersionUID = -6243624379946956810L;
 	private PlaylistInformation information;

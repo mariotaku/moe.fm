@@ -46,8 +46,8 @@ public class Moefou4JInternalJSONFactoryImpl implements Moefou4JInternalFactory 
 	}
 
 	@Override
-	public ResponseList<Wiki> createWikisList(final HttpResponse res, final String wikis_key) throws MoefouException {
-		return WikiJSONImpl.createWikisList(res, wikis_key);
+	public ResponseList<Wiki> createWikisList(final HttpResponse res) throws MoefouException {
+		return WikiJSONImpl.createWikisList(res);
 	}
 
 }

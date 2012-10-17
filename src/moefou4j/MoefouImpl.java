@@ -36,17 +36,6 @@ import moefou4j.internal.util.Moefou4JInternalStringUtil;
  */
 final class MoefouImpl extends MoefouBaseImpl implements Moefou {
 
-	public ResponseMessage logListened(long objId) throws MoefouException {
-		final HttpParameter[] params = new HttpParameter[5];
-		params[0] = new HttpParameter("log_obj_type", "sub");
-		params[1] = new HttpParameter("log_type", "listen");
-		params[2] = new HttpParameter("obj_type", "song");		
-		params[3] = new HttpParameter("obj_id", objId);
-		params[4] = PARAM_API;
-		return factory.createResponseMessage(get("http://moe.fm/ajax/log", params));
-	}
-
-
 	private final HttpParameter PARAM_API;
 
 	private final HttpParameter PARAM_API_KEY;
@@ -77,16 +66,37 @@ final class MoefouImpl extends MoefouBaseImpl implements Moefou {
 	}
 
 	@Override
-	public ResponseList<Wiki> getWikis(final Type[] types, final Paging paging, final String[] tags)
+	public ResponseList<Wiki> getWikis(final Type[] types, final Paging paging, final String... tags)
 			throws MoefouException {
+		if (tags == null || tags.length == 0) throw new IllegalArgumentException("Tag is required");
 		final HttpParameter[] params = new HttpParameter[2];
-		params[0] = new HttpParameter("wiki_type", Moefou4JInternalStringUtil.join(Type.toTypeStringArray(types)));
-		params[1] = new HttpParameter("tag", Moefou4JInternalStringUtil.join(tags));
+		params[0] = new HttpParameter("wiki_type", Moefou4JInternalStringUtil.join(Type.toTypeStringArray(types), ','));
+		params[1] = new HttpParameter("tag", Moefou4JInternalStringUtil.join(tags, ','));
 		return factory.createWikisList(
-				get(conf.getMoefouBaseURL() + "wikis.json", mergeParameters(paging.toHttpParameters(), params)),
-				"wikis");
+				get(conf.getMoefouBaseURL() + "wikis.json", mergeParameters(paging.toHttpParameters(), params)));
 	}
 
+	@Override
+	public ResponseMessage logListened(long objId) throws MoefouException {
+		final HttpParameter[] params = new HttpParameter[5];
+		params[0] = new HttpParameter("log_obj_type", "sub");
+		params[1] = new HttpParameter("log_type", "listen");
+		params[2] = new HttpParameter("obj_type", "song");		
+		params[3] = new HttpParameter("obj_id", objId);
+		params[4] = PARAM_API;
+		return factory.createResponseMessage(get("http://moe.fm/ajax/log", params));
+	}
+	
+	@Override
+	public ResponseList<Wiki> searchWikis(Wiki.Type[] types, Paging paging, String... keywords) throws MoefouException {
+		if (keywords == null || keywords.length == 0) throw new IllegalArgumentException("Keyword is required");
+		final HttpParameter[] params = new HttpParameter[2];
+		params[0] = new HttpParameter("wiki_type", Moefou4JInternalStringUtil.join(Type.toTypeStringArray(types), ','));
+		params[1] = new HttpParameter("keyword", Moefou4JInternalStringUtil.join(keywords, ' '));
+		return factory.createWikisList(
+			get(conf.getMoefouBaseURL() + "wikis.json", mergeParameters(paging.toHttpParameters(), params)));
+	}
+	
 	@Override
 	public HttpResponse rawGet(final String url, final HttpParameter... params) throws MoefouException {
 		return get(url, params);
