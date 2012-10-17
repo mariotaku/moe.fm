@@ -17,8 +17,8 @@
 package moefou4j.conf;
 
 import moefou4j.auth.AuthorizationConfiguration;
-import moefou4j.internal.http.HttpClientConfiguration;
-import moefou4j.internal.http.HttpClientWrapperConfiguration;
+import moefou4j.http.HttpClientConfiguration;
+import moefou4j.http.HttpClientWrapperConfiguration;
 
 /**
  * @author Yusuke Yamamoto - yusuke at mac.com

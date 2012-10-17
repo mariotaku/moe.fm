@@ -17,7 +17,7 @@
 package moefou4j.auth;
 
 import moefou4j.MoefouException;
-import moefou4j.internal.http.HttpResponse;
+import moefou4j.http.HttpResponse;
 
 /**
  * Representing authorized Access Token which is passed to the service provider

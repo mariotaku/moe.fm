@@ -16,7 +16,7 @@
 
 package moefou4j.auth;
 
-import moefou4j.internal.http.HttpRequest;
+import moefou4j.http.HttpRequest;
 
 /**
  * An interface represents credentials.

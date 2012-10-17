@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package moefou4j.internal.http;
+package moefou4j.http;
 
-import static moefou4j.internal.http.RequestMethod.DELETE;
-import static moefou4j.internal.http.RequestMethod.GET;
-import static moefou4j.internal.http.RequestMethod.HEAD;
-import static moefou4j.internal.http.RequestMethod.POST;
-import static moefou4j.internal.http.RequestMethod.PUT;
+import static moefou4j.http.RequestMethod.DELETE;
+import static moefou4j.http.RequestMethod.GET;
+import static moefou4j.http.RequestMethod.HEAD;
+import static moefou4j.http.RequestMethod.POST;
+import static moefou4j.http.RequestMethod.PUT;
 
 import java.util.HashMap;
 import java.util.Map;

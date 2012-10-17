@@ -19,7 +19,7 @@ package moefou4j.auth;
 import moefou4j.MoefouException;
 import moefou4j.conf.Configuration;
 import moefou4j.conf.ConfigurationContext;
-import moefou4j.internal.http.HttpResponse;
+import moefou4j.http.HttpResponse;
 
 /**
  * @author Yusuke Yamamoto - yusuke at mac.com representing unauthorized Request

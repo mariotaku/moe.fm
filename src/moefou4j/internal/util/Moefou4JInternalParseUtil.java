@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import moefou4j.MoefouException;
-import moefou4j.internal.http.HTMLEntity;
+import moefou4j.http.HTMLEntity;
 
 import org.json.JSONException;
 import org.json.JSONObject;

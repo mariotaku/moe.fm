@@ -18,9 +18,9 @@ package moefou4j;
 
 import java.util.List;
 
-import moefou4j.internal.http.HttpRequest;
-import moefou4j.internal.http.HttpResponse;
-import moefou4j.internal.http.HttpResponseCode;
+import moefou4j.http.HttpRequest;
+import moefou4j.http.HttpResponse;
+import moefou4j.http.HttpResponseCode;
 
 import org.json.JSONArray;
 import org.json.JSONException;

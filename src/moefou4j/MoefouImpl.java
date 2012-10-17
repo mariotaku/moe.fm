@@ -21,8 +21,8 @@ import moefou4j.Wiki.Type;
 import moefou4j.auth.Authorization;
 import moefou4j.auth.OAuthAuthorization;
 import moefou4j.conf.Configuration;
-import moefou4j.internal.http.HttpParameter;
-import moefou4j.internal.http.HttpResponse;
+import moefou4j.http.HttpParameter;
+import moefou4j.http.HttpResponse;
 import moefou4j.internal.util.Moefou4JInternalStringUtil;
 
 /**
@@ -35,6 +35,17 @@ import moefou4j.internal.util.Moefou4JInternalStringUtil;
  * @author Yusuke Yamamoto - yusuke at mac.com
  */
 final class MoefouImpl extends MoefouBaseImpl implements Moefou {
+
+	public ResponseMessage logListened(long objId) throws MoefouException {
+		final HttpParameter[] params = new HttpParameter[5];
+		params[0] = new HttpParameter("log_obj_type", "sub");
+		params[1] = new HttpParameter("log_type", "listen");
+		params[2] = new HttpParameter("obj_type", "song");		
+		params[3] = new HttpParameter("obj_id", objId);
+		params[4] = PARAM_API;
+		return factory.createResponseMessage(get("http://moe.fm/ajax/log", params));
+	}
+
 
 	private final HttpParameter PARAM_API;
 

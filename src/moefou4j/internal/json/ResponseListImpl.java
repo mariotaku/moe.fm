@@ -20,7 +20,7 @@ import java.util.ArrayList;
 
 import moefou4j.MoefouException;
 import moefou4j.ResponseList;
-import moefou4j.internal.http.HttpResponse;
+import moefou4j.http.HttpResponse;
 import moefou4j.internal.json.MoefouResponseImpl.InformationImpl;
 
 import org.json.JSONException;

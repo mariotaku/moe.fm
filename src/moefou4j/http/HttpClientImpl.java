@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package moefou4j.internal.http;
+package moefou4j.http;
 
-import static moefou4j.internal.http.RequestMethod.POST;
+import static moefou4j.http.RequestMethod.POST;
 
 import java.io.BufferedInputStream;
 import java.io.DataOutputStream;

@@ -17,8 +17,8 @@ package moefou4j;
 
 import moefou4j.auth.Authorization;
 import moefou4j.conf.Configuration;
-import moefou4j.internal.http.HttpParameter;
-import moefou4j.internal.http.HttpResponse;
+import moefou4j.http.HttpParameter;
+import moefou4j.http.HttpResponse;
 
 /**
  * @author Yusuke Yamamoto - yusuke at mac.com

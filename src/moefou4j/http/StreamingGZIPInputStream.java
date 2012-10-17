@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package moefou4j.internal.http;
+package moefou4j.http;
 
 import java.io.IOException;
 import java.io.InputStream;

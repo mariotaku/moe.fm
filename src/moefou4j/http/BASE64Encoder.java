@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package moefou4j.internal.http;
+package moefou4j.http;
 
 /**
  * A utility class encodes byte array into String using Base64 encoding scheme.

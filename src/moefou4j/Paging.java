@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import moefou4j.internal.http.HttpParameter;
+import moefou4j.http.HttpParameter;
 
 public class Paging implements Serializable {
 

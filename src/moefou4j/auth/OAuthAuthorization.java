@@ -31,10 +31,10 @@ import javax.crypto.spec.SecretKeySpec;
 
 import moefou4j.MoefouException;
 import moefou4j.conf.Configuration;
-import moefou4j.internal.http.BASE64Encoder;
-import moefou4j.internal.http.HttpClientWrapper;
-import moefou4j.internal.http.HttpParameter;
-import moefou4j.internal.http.HttpRequest;
+import moefou4j.http.BASE64Encoder;
+import moefou4j.http.HttpClientWrapper;
+import moefou4j.http.HttpParameter;
+import moefou4j.http.HttpRequest;
 import moefou4j.internal.logging.Logger;
 import moefou4j.internal.util.Moefou4JInternalStringUtil;
 

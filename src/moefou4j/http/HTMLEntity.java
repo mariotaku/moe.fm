@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package moefou4j.internal.http;
+package moefou4j.http;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -38,7 +38,7 @@ public final class ParcelablePlaylistItem implements Parcelable {
 
 	private final String title;
 
-	private final long upId;
+	private final long upId, subId;
 
 	private final URL url;
 
@@ -48,6 +48,7 @@ public final class ParcelablePlaylistItem implements Parcelable {
 		title = toString(json.get("title"));
 		artist = toString(json.get("artist"));
 		coverUrl = parseUrl(toString(json.get("coverUrl")));
+		subId = Long.valueOf(toString(json.get("subId")));
 	}
 
 	public ParcelablePlaylistItem(final PlaylistItem item) {
@@ -57,6 +58,7 @@ public final class ParcelablePlaylistItem implements Parcelable {
 		artist = item.getArtist();
 		final Cover cover = item != null ? item.getCover() : null;
 		coverUrl = cover != null ? cover.getSquare() : null;
+		subId = item.getSubId();
 	}
 
 	private ParcelablePlaylistItem(final Parcel in) {
@@ -65,6 +67,7 @@ public final class ParcelablePlaylistItem implements Parcelable {
 		title = in.readString();
 		artist = in.readString();
 		coverUrl = parseUrl(in.readString());
+		subId = in.readLong();
 	}
 
 	@Override
@@ -88,6 +91,10 @@ public final class ParcelablePlaylistItem implements Parcelable {
 
 	public URL getCoverUrl() {
 		return coverUrl;
+	}
+	
+	public long getSubId() {
+		return subId;
 	}
 
 	public String getTitle() {
@@ -120,7 +127,7 @@ public final class ParcelablePlaylistItem implements Parcelable {
 		json.put("title", title);
 		json.put("artist", artist);
 		json.put("coverUrl", coverUrl);
-
+		json.put("subId", subId);
 		return json;
 	}
 
@@ -137,6 +144,7 @@ public final class ParcelablePlaylistItem implements Parcelable {
 		out.writeString(title);
 		out.writeString(artist);
 		out.writeString(toString(coverUrl));
+		out.writeLong(subId);
 	}
 
 	public static List<ParcelablePlaylistItem> createListFromFile(final Context context, final String filename)

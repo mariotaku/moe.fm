@@ -14,15 +14,36 @@
  * limitations under the License.
  */
 
-package moefou4j.internal.http;
+package moefou4j.http;
 
 /**
  * @author Yusuke Yamamoto - yusuke at mac.com
- * @since Twitter4J 2.1.2
  */
-public final class HttpClientFactory {
+public interface HttpClientConfiguration {
 
-	public static HttpClient getInstance(final HttpClientConfiguration conf) {
-		return new HttpClientImpl(conf);
-	}
+	int getHttpConnectionTimeout();
+
+	int getHttpDefaultMaxPerRoute();
+
+	int getHttpMaxTotalConnections();
+
+	String getHttpProxyHost();
+
+	String getHttpProxyPassword();
+
+	int getHttpProxyPort();
+
+	String getHttpProxyUser();
+
+	int getHttpReadTimeout();
+
+	int getHttpRetryCount();
+
+	int getHttpRetryIntervalSeconds();
+
+	boolean isGZIPEnabled();
+
+	boolean isPrettyDebugEnabled();
+
+	boolean isSSLErrorIgnored();
 }

@@ -25,7 +25,7 @@ import java.util.Iterator;
 
 import moefou4j.MoefouException;
 import moefou4j.MoefouResponse;
-import moefou4j.internal.http.HttpResponse;
+import moefou4j.http.HttpResponse;
 
 import org.json.JSONArray;
 import org.json.JSONException;

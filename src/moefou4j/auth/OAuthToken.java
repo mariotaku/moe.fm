@@ -19,7 +19,7 @@ package moefou4j.auth;
 import javax.crypto.spec.SecretKeySpec;
 
 import moefou4j.MoefouException;
-import moefou4j.internal.http.HttpResponse;
+import moefou4j.http.HttpResponse;
 import moefou4j.internal.util.Moefou4JInternalStringUtil;
 
 abstract class OAuthToken {

@@ -14,7 +14,7 @@ import moefou4j.Meta;
 import moefou4j.MoefouException;
 import moefou4j.ResponseList;
 import moefou4j.Wiki;
-import moefou4j.internal.http.HttpResponse;
+import moefou4j.http.HttpResponse;
 
 import org.json.JSONArray;
 import org.json.JSONException;

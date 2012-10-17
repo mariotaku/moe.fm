@@ -26,9 +26,9 @@ import moefou4j.auth.OAuthAuthorization;
 import moefou4j.auth.OAuthSupport;
 import moefou4j.auth.RequestToken;
 import moefou4j.conf.Configuration;
-import moefou4j.internal.http.HttpClientWrapper;
-import moefou4j.internal.http.HttpResponseEvent;
-import moefou4j.internal.http.HttpResponseListener;
+import moefou4j.http.HttpClientWrapper;
+import moefou4j.http.HttpResponseEvent;
+import moefou4j.http.HttpResponseListener;
 import moefou4j.internal.json.Moefou4JInternalFactory;
 import moefou4j.internal.json.Moefou4JInternalJSONFactoryImpl;
 

@@ -21,13 +21,18 @@ import moefou4j.Playlist;
 import moefou4j.ResponseList;
 import moefou4j.Wiki;
 import moefou4j.conf.Configuration;
-import moefou4j.internal.http.HttpResponse;
+import moefou4j.http.HttpResponse;
+import moefou4j.ResponseMessage;
 
 /**
  * @author Yusuke Yamamoto - yusuke at mac.com
  * @since Twitter4J 2.2.4
  */
 public class Moefou4JInternalJSONFactoryImpl implements Moefou4JInternalFactory {
+
+	public ResponseMessage createResponseMessage(HttpResponse res) throws MoefouException {
+		return new ResponseMessageJSONImpl(res);
+	}
 
 	private final Configuration conf;
 

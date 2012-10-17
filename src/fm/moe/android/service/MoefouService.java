@@ -12,6 +12,7 @@ import moefou4j.Moefou;
 import moefou4j.MoefouException;
 import moefou4j.Playlist;
 import moefou4j.PlaylistItem;
+import moefou4j.ResponseMessage;
 
 import org.json.JSONException;
 
@@ -59,10 +60,10 @@ public class MoefouService extends Service implements Constants {
 
 		@Override
 		public void onCompletion(final int audio_session_id) {
-			System.out.println("onCompletion");
 			mNotificationManager.cancel(NOTIFICATION_ID_NOW_PLAYING);
 			if (audio_session_id == mAudioSessionId) {
 				mManager.next(true);
+				mManager.logListened(mManager.getCurrentItem());
 			}
 		}
 
@@ -82,7 +83,6 @@ public class MoefouService extends Service implements Constants {
 
 		@Override
 		public void onPrepared(final int audio_session_id) {
-			System.out.println("onPrepared");
 			if (audio_session_id == mAudioSessionId) {
 				showNowPlayingNotification();
 				try {
@@ -283,27 +283,27 @@ public class MoefouService extends Service implements Constants {
 		private static final String JSON_FILENAME_PLAYLIST = "playlist.json";
 		private static final String JSON_FILENAME_HISTORY = "history.json";
 
-		private final List<ParcelablePlaylistItem> mPlaylist = Collections
+		private final List<ParcelablePlaylistItem> playlist = Collections
 				.synchronizedList(new NoDuplicatesArrayList<ParcelablePlaylistItem>());
-		private final List<ParcelablePlaylistItem> mHistory = Collections
+		private final List<ParcelablePlaylistItem> history = Collections
 				.synchronizedList(new NoDuplicatesArrayList<ParcelablePlaylistItem>(100));
 
-		private int mPosition;
+		private int position;
 		private int mPlayMode = PLAY_MODE_SITE_SHUFFLE;
 
-		private final Random mRandom = new Random();
+		private final Random random = new Random();
 
-		private final Context mContext;
+		private final Context context;
 
 		private IMediaPlayerService mPlayer;
-		private final SiteShuffler mSiteShuffler;
+		private final SiteShuffler shuffler;
 
 		PlaylistManager(final Context context) {
-			mContext = context;
-			mSiteShuffler = new SiteShuffler(context, mHistory, this);
+			this.context = context;
+			shuffler = new SiteShuffler(context, history, this);
 			try {
-				mPlaylist.addAll(ParcelablePlaylistItem.createListFromFile(mContext, JSON_FILENAME_PLAYLIST));
-				mHistory.addAll(ParcelablePlaylistItem.createListFromFile(mContext, JSON_FILENAME_HISTORY));
+				playlist.addAll(ParcelablePlaylistItem.createListFromFile(context, JSON_FILENAME_PLAYLIST));
+				history.addAll(ParcelablePlaylistItem.createListFromFile(context, JSON_FILENAME_HISTORY));
 			} catch (final JSONException e) {
 				e.printStackTrace();
 			} catch (final IOException e) {
@@ -314,20 +314,20 @@ public class MoefouService extends Service implements Constants {
 		}
 
 		boolean add(final ParcelablePlaylistItem item) {
-			return mPlaylist.add(item);
+			return playlist.add(item);
 		}
 
 		boolean addAll(final Collection<ParcelablePlaylistItem> items) {
-			return mPlaylist.addAll(items);
+			return playlist.addAll(items);
 		}
 
 		void clear() {
-			mPlaylist.clear();
+			playlist.clear();
 			setPosition(-1);
 		}
 
 		ParcelablePlaylistItem findItem(final long upId) {
-			for (final ParcelablePlaylistItem item : mPlaylist) {
+			for (final ParcelablePlaylistItem item : playlist) {
 				if (item.getUpId() == upId) return item;
 			}
 			return null;
@@ -335,23 +335,23 @@ public class MoefouService extends Service implements Constants {
 
 		ParcelablePlaylistItem get(final int position) {
 			if (mPlayMode == PLAY_MODE_SITE_SHUFFLE) // 随机播放电台中的曲目，队列里没有曲目。
-				return mSiteShuffler.getCurrentItem();
-			if (mPlaylist.size() == 0) return null;
-			return position >= 0 && position < mPlaylist.size() ? mPlaylist.get(position) : null;
+				return shuffler.getCurrentItem();
+			if (playlist.size() == 0) return null;
+			return position >= 0 && position < playlist.size() ? playlist.get(position) : null;
 		}
 
 		ParcelablePlaylistItem getCurrentItem() {
-			final ParcelablePlaylistItem item = get(mPosition);
+			final ParcelablePlaylistItem item = get(position);
 			if (item != null) return item;
-			return mPlaylist.get(0);
+			return playlist.size() > 0 ? playlist.get(0) : null;
 		}
 
 		int getItemIndex(final ParcelablePlaylistItem item) {
-			return mPlaylist.indexOf(item);
+			return playlist.indexOf(item);
 		}
 
 		List<ParcelablePlaylistItem> getPlaylist() {
-			return mPlaylist;
+			return playlist;
 		}
 
 		int getQueuePosition() {
@@ -360,7 +360,7 @@ public class MoefouService extends Service implements Constants {
 					return -1;
 				}
 			}
-			return mPosition;
+			return position;
 		}
 
 		boolean isPlaying() {
@@ -374,7 +374,7 @@ public class MoefouService extends Service implements Constants {
 		}
 
 		void jumpToId(final long upId) {
-			final int size = mPlaylist.size();
+			final int size = playlist.size();
 			if (size == 0) {
 				setPosition(-1);
 				return;
@@ -384,7 +384,7 @@ public class MoefouService extends Service implements Constants {
 				return;
 			}
 			for (int i = 0; i < size; i++) {
-				if (mPlaylist.get(i).getUpId() == upId) {
+				if (playlist.get(i).getUpId() == upId) {
 					setPosition(i);
 					return;
 				}
@@ -406,17 +406,21 @@ public class MoefouService extends Service implements Constants {
 			}
 			return false;
 		}
+		
+		void logListened(final ParcelablePlaylistItem item) {
+			new LogListenedTask(context, item).execute();
+		}
 
 		boolean next(final boolean play_now) {
 			switch (mPlayMode) {
 				case PLAY_MODE_SITE_SHUFFLE: {
-					return mSiteShuffler.next(play_now);
+					return shuffler.next(play_now);
 				}
 			}
-			final int size = mPlaylist.size();
+			final int size = playlist.size();
 			if (size == 0) return false;
-			if (mPosition == size - 1) return false;
-			final boolean ret = select(mPosition + 1);
+			if (position == size - 1) return false;
+			final boolean ret = select(position + 1);
 			return play_now ? prepare() : ret;
 		}
 
@@ -436,25 +440,25 @@ public class MoefouService extends Service implements Constants {
 		boolean prev(final boolean play_now) {
 			switch (mPlayMode) {
 				case PLAY_MODE_SITE_SHUFFLE: {
-					return mSiteShuffler.prev(play_now);
+					return shuffler.prev(play_now);
 				}
 			}
-			final int size = mPlaylist.size();
+			final int size = playlist.size();
 			if (size == 0) return false;
-			if (mPosition == 0) return false;
-			final boolean ret = select(mPosition + 1);
+			if (position == 0) return false;
+			final boolean ret = select(position + 1);
 			return play_now ? prepare() : ret;
 		}
 
 		void saveStates() {
 			try {
-				ParcelablePlaylistItem.saveListToFile(mContext, JSON_FILENAME_PLAYLIST, mPlaylist);
-				ParcelablePlaylistItem.saveListToFile(mContext, JSON_FILENAME_HISTORY, mHistory);
-				mSiteShuffler.saveQueue();
+				ParcelablePlaylistItem.saveListToFile(context, JSON_FILENAME_PLAYLIST, playlist);
+				ParcelablePlaylistItem.saveListToFile(context, JSON_FILENAME_HISTORY, history);
+				shuffler.saveQueue();
 				final ParcelablePlaylistItem item = getCurrentItem();
 				if (item != null) {
 					JSONFileHelper.write(item.toJSONObject(),
-							JSONFileHelper.getFilePath(mContext, JSON_FILENAME_CURRENT_ITEM));
+							JSONFileHelper.getFilePath(context, JSON_FILENAME_CURRENT_ITEM));
 				}
 			} catch (final JSONException e) {
 				e.printStackTrace();
@@ -487,22 +491,49 @@ public class MoefouService extends Service implements Constants {
 		}
 
 		void setPosition(final int pos) {
-			mPosition = pos;
-			mContext.sendBroadcast(new Intent(BROADCAST_ON_CURRENT_ITEM_CHANGED));
+			position = pos;
+			context.sendBroadcast(new Intent(BROADCAST_ON_CURRENT_ITEM_CHANGED));
 		}
 
 		boolean shuffle() {
 			switch (mPlayMode) {
 				case PLAY_MODE_SITE_SHUFFLE: {
-					return mSiteShuffler.shuffle(false);
+					return shuffler.shuffle(false);
 				}
 			}
 			if (mPlayer == null) return false;
-			final int size = mPlaylist.size();
+			final int size = playlist.size();
 			if (size == 0) return false;
-			final int idx = mRandom.nextInt(size);
+			final int idx = random.nextInt(size);
 			return select(idx);
 		}
+
+		static final class LogListenedTask extends AsyncTask<Void, Void, ResponseMessage> {
+
+			private final ParcelablePlaylistItem item;
+			private final Moefou moefou;
+
+			LogListenedTask(final Context context, final ParcelablePlaylistItem item) {
+				this.item = item;
+				this.moefou = Utils.getMoefouInstance(context);
+			}
+
+			@Override
+			protected ResponseMessage doInBackground(final Void... args) {
+				if (moefou == null || item == null) return null;
+				try {
+					return moefou.logListened(item.getSubId());
+				} catch (final Exception e) {
+					return null;
+				}
+			}
+
+			@Override
+			protected void onPostExecute(final ResponseMessage result) {
+				if (result == null) return;
+			}
+		}
+		
 	}
 
 	static final class ServiceStub extends IMoefouService.Stub {
@@ -623,7 +654,7 @@ public class MoefouService extends Service implements Constants {
 
 		private final List<ParcelablePlaylistItem> queue = Collections
 				.synchronizedList(new NoDuplicatesArrayList<ParcelablePlaylistItem>());
-		private int mPosition = -1;
+		private int position = -1;
 
 		private boolean is_playing_history;
 		private ParcelablePlaylistItem current;
@@ -655,6 +686,9 @@ public class MoefouService extends Service implements Constants {
 		}
 
 		ParcelablePlaylistItem getCurrentItem() {
+			if (current == null) {
+				shuffle(false);
+			}
 			return current;
 		}
 
@@ -672,27 +706,27 @@ public class MoefouService extends Service implements Constants {
 
 		boolean next(final boolean play_now) {
 			checkQueue();
-			if (mPosition == -1 || mPosition >= history.size() - 1) {
+			if (position == -1 || position >= history.size() - 1) {
 				// 没有在播放之前的曲目或者已经到了历史的最后一条，所以直接从还没播放的列表里随机挑一首
-				mPosition = -1;
+				position = -1;
 				is_playing_history = false;
 				return shuffle(play_now);
 			}
-			mPosition++;
-			final boolean ret = select(history.get(mPosition));
+			position++;
+			final boolean ret = select(history.get(position));
 			return play_now ? manager.prepare() : ret;
 		}
 
 		boolean prev(final boolean play_now) {
 			checkQueue();
-			if (mPosition == 0 || history.size() == 0) // 已经到了播放历史的第一个或者历史是空的
+			if (position == 0 || history.size() == 0) // 已经到了播放历史的第一个或者历史是空的
 				return false;
-			if (mPosition >= history.size() || mPosition < 0) {
-				mPosition = history.size() - 1;
+			if (position >= history.size() || position < 0) {
+				position = history.size() - 1;
 			}
 			is_playing_history = true;
-			mPosition--;
-			final boolean ret = select(history.get(mPosition));
+			position--;
+			final boolean ret = select(history.get(position));
 			return play_now ? manager.prepare() : ret;
 		}
 
@@ -727,19 +761,20 @@ public class MoefouService extends Service implements Constants {
 
 			private final Context context;
 			private final List<ParcelablePlaylistItem> list;
+			private final Moefou moefou;
 
 			GetPlaylistTask(final Context context, final List<ParcelablePlaylistItem> list) {
 				this.context = context;
 				this.list = list;
+				this.moefou = Utils.getMoefouInstance(context);
 			}
 
 			@Override
 			protected Playlist doInBackground(final Void... args) {
-				final Moefou moefou = Utils.getMoefouInstance(context);
 				if (moefou == null) return null;
 				try {
 					return moefou.getPlaylist();
-				} catch (final MoefouException e) {
+				} catch (final Exception e) {
 					return null;
 				}
 			}

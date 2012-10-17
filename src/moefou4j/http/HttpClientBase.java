@@ -1,4 +1,4 @@
-package moefou4j.internal.http;
+package moefou4j.http;
 
 import java.io.DataOutputStream;
 import java.io.IOException;

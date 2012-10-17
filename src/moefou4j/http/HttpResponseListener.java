@@ -1,4 +1,4 @@
-package moefou4j.internal.http;
+package moefou4j.http;
 
 /**
  * @author Andrew Hedges - andrew.hedges at gmail.com

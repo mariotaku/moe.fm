@@ -20,7 +20,8 @@ import moefou4j.MoefouException;
 import moefou4j.Playlist;
 import moefou4j.ResponseList;
 import moefou4j.Wiki;
-import moefou4j.internal.http.HttpResponse;
+import moefou4j.http.HttpResponse;
+import moefou4j.ResponseMessage;
 
 /**
  * @author Yusuke Yamamoto - yusuke at mac.com
@@ -32,4 +33,6 @@ public interface Moefou4JInternalFactory {
 
 	public ResponseList<Wiki> createWikisList(HttpResponse res, String wikis_key) throws MoefouException;
 
+	public ResponseMessage createResponseMessage(HttpResponse res) throws MoefouException;
+	
 }

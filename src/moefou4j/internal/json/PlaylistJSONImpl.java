@@ -9,7 +9,7 @@ import java.util.Arrays;
 import moefou4j.MoefouException;
 import moefou4j.Playlist;
 import moefou4j.PlaylistItem;
-import moefou4j.internal.http.HttpResponse;
+import moefou4j.http.HttpResponse;
 import moefou4j.internal.json.MoefouResponseImpl.InformationImpl;
 
 import org.json.JSONArray;
