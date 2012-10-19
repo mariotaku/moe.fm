@@ -93,7 +93,7 @@ public class TestActivity extends Activity implements TextWatcher, View.OnClickL
 		}
 		
 		protected void onPostExecute(Object result) {
-			view.append("------------------------------------");
+			view.append("------------------------------------\n");
 			if (result instanceof Throwable) {
 				final StringWriter sw = new StringWriter();
 				final PrintWriter pw = new PrintWriter(sw);

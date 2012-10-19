@@ -99,7 +99,7 @@ final class MoefouImpl extends MoefouBaseImpl implements Moefou {
 	@Override
 	public HttpResponse rawGet(final String url, final HttpParameter... params) throws MoefouException {
 		if (url == null) throw new NullPointerException();
-		if (!url.startsWith(conf.getMoefouBaseURL()) && url.startsWith(conf.getMoeFMBaseURL()))
+		if (!url.startsWith(conf.getMoefouBaseURL()) && !url.startsWith(conf.getMoeFMBaseURL()))
 			throw new IllegalArgumentException("Not a valid API address!");
 		return get(url, params);
 	}
@@ -107,7 +107,7 @@ final class MoefouImpl extends MoefouBaseImpl implements Moefou {
 	@Override
 	public HttpResponse rawPost(final String url, final HttpParameter... params) throws MoefouException {
 		if (url == null) throw new NullPointerException();
-		if (!url.startsWith(conf.getMoefouBaseURL()) && url.startsWith(conf.getMoeFMBaseURL()))
+		if (!url.startsWith(conf.getMoefouBaseURL()) && !url.startsWith(conf.getMoeFMBaseURL()))
 			throw new IllegalArgumentException("Not a valid API address!");
 		return post(url, params);
 	}
