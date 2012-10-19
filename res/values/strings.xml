@@ -14,5 +14,7 @@
 	<string name="logout">Logout</string>
 	<string name="logout_confirm">Are you sure to logout?</string>
 	<string name="quit">Quit</string>
+	<string name="continue_text">Continue</string>
+	<string name="network_confirm">You are using mobile network.</string>
 
 </resources>

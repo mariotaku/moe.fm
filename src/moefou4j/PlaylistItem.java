@@ -34,7 +34,7 @@ public interface PlaylistItem extends Serializable {
 
 	public String getSubTitle();
 
-	public Sub.Type getSubType();
+	public Wiki.Sub.Type getSubType();
 
 	public URL getSubUrl();
 

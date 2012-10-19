@@ -11,7 +11,6 @@ import moefou4j.Cover;
 import moefou4j.Favorite;
 import moefou4j.MoefouException;
 import moefou4j.PlaylistItem;
-import moefou4j.Sub;
 import moefou4j.Wiki;
 import moefou4j.Wiki.Type;
 
@@ -31,7 +30,7 @@ final class PlaylistItemJSONImpl implements PlaylistItem {
 	private String artist;
 	private URL subUrl;
 	private String subTitle;
-	private Sub.Type subType;
+	private Wiki.Sub.Type subType;
 	private long subId;
 	private String wikiTitle;
 	private Type wikiType;
@@ -59,7 +58,7 @@ final class PlaylistItemJSONImpl implements PlaylistItem {
 		wikiTitle = getRawString("wiki_title", json);
 		wikiUrl = getURLFromString("wiki_url", json);
 		subId = getLong("sub_id", json);
-		subType = Sub.Type.fromString(getRawString("sub_type", json));
+		subType = Wiki.Sub.Type.fromString(getRawString("sub_type", json));
 		subTitle = getRawString("sub_title", json);
 		subUrl = getURLFromString("sub_url", json);
 		artist = getRawString("artist", json);
@@ -132,7 +131,7 @@ final class PlaylistItemJSONImpl implements PlaylistItem {
 	}
 
 	@Override
-	public Sub.Type getSubType() {
+	public Wiki.Sub.Type getSubType() {
 		return subType;
 	}
 

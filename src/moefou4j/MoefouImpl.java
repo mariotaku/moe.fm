@@ -26,8 +26,7 @@ import moefou4j.http.HttpResponse;
 import moefou4j.internal.util.Moefou4JInternalStringUtil;
 
 /**
- * A java representation of the <a
- * href="https://dev.twitter.com/docs/api">Twitter REST API</a><br>
+ * A java representation of the Moefou API<br>
  * This class is thread safe and can be cached/re-used and used concurrently.<br>
  * Currently this class is not carefully designed to be extended. It is
  * suggested to extend this class only for mock testing purpose.<br>
@@ -99,11 +98,17 @@ final class MoefouImpl extends MoefouBaseImpl implements Moefou {
 	
 	@Override
 	public HttpResponse rawGet(final String url, final HttpParameter... params) throws MoefouException {
+		if (url == null) throw new NullPointerException();
+		if (!url.startsWith(conf.getMoefouBaseURL()) && url.startsWith(conf.getMoeFMBaseURL()))
+			throw new IllegalArgumentException("Not a valid API address!");
 		return get(url, params);
 	}
 
 	@Override
 	public HttpResponse rawPost(final String url, final HttpParameter... params) throws MoefouException {
+		if (url == null) throw new NullPointerException();
+		if (!url.startsWith(conf.getMoefouBaseURL()) && url.startsWith(conf.getMoeFMBaseURL()))
+			throw new IllegalArgumentException("Not a valid API address!");
 		return post(url, params);
 	}
 
