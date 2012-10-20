@@ -16,6 +16,8 @@
 
 package moefou4j.internal.json;
 
+import static moefou4j.internal.util.Moefou4JInternalParseUtil.getInt;
+ 
 import java.util.ArrayList;
 
 import moefou4j.MoefouException;
@@ -31,9 +33,10 @@ import org.json.JSONObject;
  * @since Twitter4J 2.1.3
  */
 class ResponseListImpl<T> extends ArrayList<T> implements ResponseList<T> {
+
 	private static final long serialVersionUID = -7789068763212377625L;
 
-	private Information information;
+	private PageableInformation information;
 
 	ResponseListImpl() {
 		super();
@@ -49,7 +52,7 @@ class ResponseListImpl<T> extends ArrayList<T> implements ResponseList<T> {
 	}
 
 	@Override
-	public Information getInformation() {
+	public PageableInformation getInformation() {
 		return information;
 	}
 
@@ -61,9 +64,39 @@ class ResponseListImpl<T> extends ArrayList<T> implements ResponseList<T> {
 	private void init(final JSONObject json) throws MoefouException {
 		try {
 			final JSONObject response_json = json.getJSONObject("response");
-			information = new InformationImpl(response_json);
+			information = new PageableInformationImpl(response_json);
 		} catch (final JSONException e) {
 			throw new MoefouException(e);
 		}
+	}
+
+	static class PageableInformationImpl extends InformationImpl implements PageableInformation {
+
+		private static final long serialVersionUID = 8390363206544179609L;
+		int itemCount;
+		int page;
+
+		PageableInformationImpl(final JSONObject json) throws MoefouException {
+			super(json);
+			page = getInt("page", json);
+			itemCount = getInt("item_count", json);
+		}
+
+		@Override
+		public int getItemCount() {
+			return itemCount;
+		}
+
+		@Override
+		public int getPage() {
+			return page;
+		}
+
+		@Override
+		public String toString() {
+			return "PlaylistInformationImpl{itemCount=" + itemCount + ", page=" + page + ", parameters=" + parameters
+				+ ", request=" + request + "}";
+		}
+
 	}
 }

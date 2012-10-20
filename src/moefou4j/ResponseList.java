@@ -26,4 +26,14 @@ import java.util.List;
  */
 public interface ResponseList<T> extends MoefouResponse, List<T>, Serializable {
 
+	@Override
+	public PageableInformation getInformation();
+
+	public interface PageableInformation extends Information {
+
+		public int getItemCount();
+
+		public int getPage();
+
+	}
 }

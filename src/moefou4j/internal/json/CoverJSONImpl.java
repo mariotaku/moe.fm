@@ -16,7 +16,7 @@ final class CoverJSONImpl implements Cover {
 	public URL small;
 	public URL square;
 
-	public CoverJSONImpl(final JSONObject json) {
+	CoverJSONImpl(final JSONObject json) {
 		small = getURLFromString("small", json);
 		medium = getURLFromString("medium", json);
 		large = getURLFromString("large", json);

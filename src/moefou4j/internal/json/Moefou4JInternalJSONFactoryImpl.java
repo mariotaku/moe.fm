@@ -30,10 +30,6 @@ import moefou4j.ResponseMessage;
  */
 public class Moefou4JInternalJSONFactoryImpl implements Moefou4JInternalFactory {
 
-	public ResponseMessage createResponseMessage(HttpResponse res) throws MoefouException {
-		return new ResponseMessageJSONImpl(res);
-	}
-
 	private final Configuration conf;
 
 	public Moefou4JInternalJSONFactoryImpl(final Configuration conf) {
@@ -41,8 +37,18 @@ public class Moefou4JInternalJSONFactoryImpl implements Moefou4JInternalFactory 
 	}
 
 	@Override
-	public Playlist createPlayist(final HttpResponse res, final String json_key) throws MoefouException {
-		return PlaylistJSONImpl.createPlayList(res, json_key);
+	public Playlist createPlayist(final HttpResponse res) throws MoefouException {
+		return PlaylistJSONImpl.createPlayList(res);
+	}
+
+	@Override
+	public ResponseMessage createResponseMessage(HttpResponse res) throws MoefouException {
+		return new ResponseMessageJSONImpl(res);
+	}
+	
+	@Override
+	public Wiki createWiki(HttpResponse res) throws MoefouException {
+		return new WikiJSONImpl(res);
 	}
 
 	@Override

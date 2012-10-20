@@ -48,7 +48,7 @@ import org.json.JSONObject;
 
 	public MoefouResponseImpl() {
 	}
-
+	
 	public MoefouResponseImpl(final HttpResponse res) throws MoefouException {
 		this(res.asJSONObject());
 	}
@@ -64,8 +64,13 @@ import org.json.JSONObject;
 
 	private void init(final JSONObject json) throws MoefouException {
 		try {
-			information = new InformationImpl(json.getJSONObject("response"));
-		} catch (final MoefouException e) {
+			final JSONObject info_json = json.getJSONObject("response").getJSONObject("information");
+			information = new InformationImpl(info_json);
+			if(getBoolean("has_error", info_json) && !info_json.isNull("msg")) {
+				final JSONArray msg_json = info_json.getJSONArray("msg");
+				if (msg_json.length() > 0) throw new MoefouException(msg_json.getString(0), information);
+				throw new MoefouException("Unknown error", information);
+			}
 		} catch (final JSONException e) {
 			throw new MoefouException(e);
 		}
@@ -74,25 +79,12 @@ import org.json.JSONObject;
 	static class InformationImpl implements Information {
 
 		private static final long serialVersionUID = -606811929444784275L;
-		boolean hasError;
 		HashMap<String, String> parameters;
-		String[] messages;
 		String request;
 
-		public InformationImpl(final JSONObject resp_json) throws MoefouException {
-			if (resp_json == null) return;
+		public InformationImpl(final JSONObject json) throws MoefouException {
+			if (json == null) return;
 			try {
-				final JSONObject json = resp_json.getJSONObject("information");
-				hasError = getBoolean("has_error", json);
-				if (!json.isNull("msg")) {
-					final JSONArray msg_json = json.getJSONArray("msg");
-					final int msg_length = msg_json.length();
-					messages = new String[msg_length];
-					for (int i = 0; i < msg_length; i++) {
-						messages[i] = String.valueOf(msg_json.get(i));
-					}
-					if (hasError && messages.length > 0) throw new MoefouException(messages[0]);
-				}
 				if (!json.isNull("parameters")) {
 					final JSONObject params_json = json.getJSONObject("parameters");
 					parameters = new HashMap<String, String>();
@@ -109,11 +101,6 @@ import org.json.JSONObject;
 		}
 
 		@Override
-		public String[] getMessages() {
-			return messages;
-		}
-
-		@Override
 		public HashMap<String, String> getParameters() {
 			return parameters;
 		}
@@ -124,14 +111,9 @@ import org.json.JSONObject;
 		}
 
 		@Override
-		public boolean hasError() {
-			return hasError;
-		}
-
-		@Override
 		public String toString() {
-			return "InformationImpl{hasError=" + hasError + ", parameters=" + parameters + ", messages="
-					+ Arrays.toString(messages) + ", request=" + request + "}";
+			return "InformationImpl{parameters=" + parameters + ", messages="
+					+ ", request=" + request + "}";
 		}
 	}
 

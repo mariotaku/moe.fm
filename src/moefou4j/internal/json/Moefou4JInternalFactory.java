@@ -29,10 +29,12 @@ import moefou4j.ResponseMessage;
  */
 public interface Moefou4JInternalFactory {
 
-	public Playlist createPlayist(HttpResponse res, String playlist_key) throws MoefouException;
+	public Playlist createPlayist(HttpResponse res) throws MoefouException;
 
 	public ResponseList<Wiki> createWikisList(HttpResponse res) throws MoefouException;
 
 	public ResponseMessage createResponseMessage(HttpResponse res) throws MoefouException;
+	
+	public Wiki createWiki(HttpResponse res) throws MoefouException;
 	
 }

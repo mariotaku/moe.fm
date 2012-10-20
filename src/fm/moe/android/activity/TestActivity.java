@@ -18,6 +18,7 @@ import java.io.StringWriter;
 import moefou4j.Moefou;
 import moefou4j.conf.Configuration;
 import moefou4j.http.HttpResponse;
+import moefou4j.Wiki;
 
 public class TestActivity extends Activity implements TextWatcher, View.OnClickListener {
 
@@ -71,6 +72,7 @@ public class TestActivity extends Activity implements TextWatcher, View.OnClickL
 		private final String url;
 		private final Moefou moefou;
 		private final TextView view;
+		
 		RequestTask(final String url, final Moefou moefou, final TextView view) {
 			this.url = url;
 			this.moefou = moefou;
@@ -79,9 +81,10 @@ public class TestActivity extends Activity implements TextWatcher, View.OnClickL
 		
 		protected Object doInBackground(Void... args) {
 			try {
-				final HttpResponse resp = moefou.rawGet(url);
-				final String resp_string = resp.asJSONObject().toString(1);
-				return "Response: " + resp.getStatusCode() + "\n" + resp_string;
+				final HttpResponse resp = moefou.rawGet(url);				
+				final StringBuilder builder = new StringBuilder("Response: " + resp.getStatusCode() + "\n");
+				builder.append(resp.asJSONObject().toString(1));
+				return builder;
 			} catch (final Throwable t) {
 				return t;
 			}

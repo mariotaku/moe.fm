@@ -49,7 +49,7 @@ final class MoefouImpl extends MoefouBaseImpl implements Moefou {
 
 	@Override
 	public Playlist getNextPlaylist(final Playlist.PlaylistInformation info) throws MoefouException {
-		return factory.createPlayist(get(String.valueOf(info.getNextUrl())), "playlist");
+		return factory.createPlayist(get(String.valueOf(info.getNextUrl())));
 	}
 
 	@Override
@@ -60,8 +60,7 @@ final class MoefouImpl extends MoefouBaseImpl implements Moefou {
 	@Override
 	public Playlist getPlaylist(final Paging paging) throws MoefouException {
 		return factory.createPlayist(
-				get(conf.getMoeFMBaseURL() + "listen/playlist", mergeParameters(paging.toHttpParameters(), PARAM_API)),
-				"playlist");
+				get(conf.getMoeFMBaseURL() + "listen/playlist", mergeParameters(paging.toHttpParameters(), PARAM_API)));
 	}
 
 	@Override
@@ -94,6 +93,18 @@ final class MoefouImpl extends MoefouBaseImpl implements Moefou {
 		params[1] = new HttpParameter("keyword", Moefou4JInternalStringUtil.join(keywords, ' '));
 		return factory.createWikisList(
 			get(conf.getMoefouBaseURL() + "wikis.json", mergeParameters(paging.toHttpParameters(), params)));
+	}
+	
+	@Override
+	public Wiki showWiki(Wiki.Type type, String name) throws MoefouException {
+		return factory.createWiki(get(conf.getMoefouBaseURL() + type.getTypeString() + "/detail.json",
+			 	new HttpParameter("wiki_name", name)));
+	}
+
+	@Override
+	public Wiki showWiki(Wiki.Type type, long id) throws MoefouException {
+		return factory.createWiki(get(conf.getMoefouBaseURL() + type.getTypeString() + "/detail.json",
+				new HttpParameter("wiki_id", id)));
 	}
 	
 	@Override

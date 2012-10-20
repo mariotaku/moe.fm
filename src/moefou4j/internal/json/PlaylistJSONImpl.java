@@ -37,17 +37,17 @@ final class PlaylistJSONImpl extends ResponseListImpl<PlaylistItem> implements P
 
 	private void init(final JSONObject json) throws MoefouException {
 		try {
-			final JSONObject information_json = json.getJSONObject("response");
+			final JSONObject information_json = json.getJSONObject("response").getJSONObject("information");
 			information = new PlaylistInformationImpl(information_json);
 		} catch (final JSONException e) {
 			throw new MoefouException(e);
 		}
 	}
 
-	public static Playlist createPlayList(final HttpResponse res, final String json_key) throws MoefouException {
+	public static Playlist createPlayList(final HttpResponse res) throws MoefouException {
 		try {
 			final Playlist list = new PlaylistJSONImpl(res);
-			final JSONArray playlist_json = res.asJSONObject().getJSONObject("response").getJSONArray(json_key);
+			final JSONArray playlist_json = res.asJSONObject().getJSONObject("response").getJSONArray("playlist");
 			if (playlist_json == null) throw new MoefouException("Unknown response value!");
 			final int length = playlist_json.length();
 			for (int i = 0; i < length; i++) {
@@ -59,43 +59,24 @@ final class PlaylistJSONImpl extends ResponseListImpl<PlaylistItem> implements P
 		}
 	}
 
-	static class PlaylistInformationImpl extends InformationImpl implements PlaylistInformation {
+	static class PlaylistInformationImpl extends PageableInformationImpl implements PlaylistInformation {
 
 		private static final long serialVersionUID = 8390363206544179609L;
 		private boolean mayHaveNext;
 		private boolean isTarget;
-		private int itemCount;
-		private int page;
 		private String nextUrl;
 
-		PlaylistInformationImpl(final JSONObject resp_json) throws MoefouException {
-			super(resp_json);
-			try {
-				final JSONObject json = resp_json.getJSONObject("information");
-				page = getInt("page", json);
-				itemCount = getInt("item_count", json);
-				isTarget = getBoolean("is_target", json);
-				mayHaveNext = getBoolean("may_have_next", json);
-				nextUrl = getRawString("next_url", json);
-			} catch (final JSONException e) {
-				throw new MoefouException(e);
-			}
+		PlaylistInformationImpl(final JSONObject json) throws MoefouException {
+			super(json);
+			isTarget = getBoolean("is_target", json);
+			mayHaveNext = getBoolean("may_have_next", json);
+			nextUrl = getRawString("next_url", json);
 
-		}
-
-		@Override
-		public int getItemCount() {
-			return itemCount;
 		}
 
 		@Override
 		public String getNextUrl() {
 			return nextUrl;
-		}
-
-		@Override
-		public int getPage() {
-			return page;
 		}
 
 		@Override
@@ -111,9 +92,8 @@ final class PlaylistJSONImpl extends ResponseListImpl<PlaylistItem> implements P
 		@Override
 		public String toString() {
 			return "PlaylistInformationImpl{mayHaveNext=" + mayHaveNext + ", isTarget=" + isTarget + ", itemCount="
-					+ itemCount + ", page=" + page + ", nextUrl=" + nextUrl + ", hasError=" + hasError
-					+ ", parameters=" + parameters + ", messages=" + Arrays.toString(messages) + ", request=" + request
-					+ "}";
+					+ itemCount + ", page=" + page + ", nextUrl=" + nextUrl + ", parameters=" + parameters
+					+ ", request=" + request + "}";
 		}
 
 	}

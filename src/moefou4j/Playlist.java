@@ -5,13 +5,9 @@ public interface Playlist extends ResponseList<PlaylistItem> {
 	@Override
 	public PlaylistInformation getInformation();
 
-	public interface PlaylistInformation extends Information {
-
-		public int getItemCount();
+	public interface PlaylistInformation extends PageableInformation {
 
 		public String getNextUrl();
-
-		public int getPage();
 
 		public boolean isTarget();
 

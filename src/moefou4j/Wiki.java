@@ -34,6 +34,15 @@ public interface Wiki extends Serializable {
 
 	public Favorite getUserFavorite();
 
+	public static interface Meta extends Serializable {
+
+		public String getKey();
+
+		public int getType();
+
+		public String getValue();
+	}
+	
 	/**
 	 * 子条目<br>
 	 * 
@@ -44,7 +53,7 @@ public interface Wiki extends Serializable {
 	 * @author mariotaku
 	 * 
 	 */
-	public interface Sub extends Serializable {
+	public static interface Sub extends Serializable {
 
 		/**
 		 * @return 子条目id号

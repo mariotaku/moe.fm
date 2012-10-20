@@ -21,11 +21,11 @@ class FavoriteJSONImpl implements Favorite {
 	private Type objectType;
 	private int type;
 
-	public FavoriteJSONImpl() {
+	FavoriteJSONImpl() {
 
 	}
 
-	public FavoriteJSONImpl(final JSONObject json) {
+	FavoriteJSONImpl(final JSONObject json) {
 		date = new Date(getLong("fav_date", json) * 1000);
 		id = getLong("fav_id", json);
 		objectId = getLong("fav_obj_id", json);

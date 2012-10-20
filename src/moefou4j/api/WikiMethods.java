@@ -26,4 +26,7 @@ public interface WikiMethods {
 	 */
 	public ResponseList<Wiki> getWikis(Wiki.Type[] type, Paging paging, String... tags) throws MoefouException;
 
+	public Wiki showWiki(Wiki.Type type, String name) throws MoefouException;
+
+	public Wiki showWiki(Wiki.Type type, long id) throws MoefouException;
 }

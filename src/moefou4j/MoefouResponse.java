@@ -22,13 +22,8 @@ import java.util.HashMap;
 public interface MoefouResponse extends Serializable {
 
 	public Information getInformation();
-
+	
 	public interface Information extends Serializable {
-
-		/**
-		 * 错误信息（应该是这样的吧……
-		 */
-		public String[] getMessages();
 
 		/**
 		 * 请求的参数
@@ -37,6 +32,5 @@ public interface MoefouResponse extends Serializable {
 
 		public String getRequest();
 
-		public boolean hasError();
 	}
 }

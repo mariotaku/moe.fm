@@ -1,5 +1,6 @@
 package moefou4j.internal.json;
 
+import static moefou4j.internal.util.Moefou4JInternalParseUtil.getInt;
 import static moefou4j.internal.util.Moefou4JInternalParseUtil.getLong;
 import static moefou4j.internal.util.Moefou4JInternalParseUtil.getRawString;
 import static moefou4j.internal.util.Moefou4JInternalParseUtil.getURLFromString;
@@ -10,7 +11,6 @@ import java.util.Date;
 
 import moefou4j.Cover;
 import moefou4j.Favorite;
-import moefou4j.Meta;
 import moefou4j.MoefouException;
 import moefou4j.ResponseList;
 import moefou4j.Wiki;
@@ -20,7 +20,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-class WikiJSONImpl implements Wiki {
+final class WikiJSONImpl extends MoefouResponseImpl implements Wiki {
 
 	private static final long serialVersionUID = 7565441300902354863L;
 	private long id;
@@ -28,6 +28,7 @@ class WikiJSONImpl implements Wiki {
 	private String titleEncode;
 	private String name;
 	private Type[] types;
+	private Meta[] metas;
 	private long parent;
 	private Date date;
 	private Date modified;
@@ -37,7 +38,24 @@ class WikiJSONImpl implements Wiki {
 	private Cover cover;
 	private Favorite userFavorite;
 
+	public WikiJSONImpl(final HttpResponse res) throws MoefouException {
+		super(res);
+		try {
+			init(res.asJSONObject().getJSONObject("response").getJSONObject("wiki"));
+		} catch (JSONException e) {
+			throw new MoefouException(e);
+		}
+	}
+	
 	public WikiJSONImpl(final JSONObject json) throws MoefouException {
+		init(json);
+	}
+
+	WikiJSONImpl() {
+
+	}
+	
+	private void init(final JSONObject json) throws MoefouException {
 		id = getLong("wiki_id", json);
 		title = getRawString("wiki_title", json);
 		titleEncode = getRawString("wiki_title_encode", json);
@@ -63,10 +81,13 @@ class WikiJSONImpl implements Wiki {
 				throw new MoefouException(jsone);
 			}
 		}
-	}
-
-	WikiJSONImpl() {
-
+		if (!json.isNull("wiki_meta")) {
+			try {
+				metas = MetaJSONImpl.getMetas(json.getJSONArray("wiki_meta"));
+			} catch (JSONException jsone) {
+				throw new MoefouException(jsone);
+			}
+		}
 	}
 
 	@Override
@@ -131,7 +152,7 @@ class WikiJSONImpl implements Wiki {
 
 	@Override
 	public Meta[] getMetas() {
-		return null;
+		return metas;
 	}
 
 	@Override
@@ -204,13 +225,13 @@ class WikiJSONImpl implements Wiki {
 		return "WikiJSONImpl{id=" + id + ", title=" + title + ", titleEncode=" + titleEncode + ", name=" + name
 				+ ", types=" + Arrays.toString(types) + ", parent=" + parent + ", date=" + date + ", modified="
 				+ modified + ", modifiedUser=" + modifiedUser + ", fmUrl=" + fmUrl + ", url=" + url + ", cover="
-				+ cover + ", userFavorite=" + userFavorite + "}";
+				+ cover + ", userFavorite=" + userFavorite + ", metas=" + Arrays.toString(metas) + "}";
 	}
 
 	public static ResponseList<Wiki> createWikisList(final HttpResponse res)
 			throws MoefouException {
 		try {
-					final JSONObject json = res.asJSONObject();
+			final JSONObject json = res.asJSONObject();
 			final ResponseList<Wiki> list = new ResponseListImpl<Wiki>(json);
 			final JSONArray wikis_json = json.getJSONObject("response").getJSONArray("wikis");
 			if (wikis_json == null) throw new MoefouException("Unknown response value!");
@@ -224,4 +245,45 @@ class WikiJSONImpl implements Wiki {
 		}
 	}
 
+	final static class MetaJSONImpl implements Meta {
+
+		private int type;
+		private String value;
+		private String key;
+
+		MetaJSONImpl(final JSONObject json) {
+			key = getRawString("meta_key", json);
+			value = getRawString("meta_value", json);
+			type = getInt("meta_type", json);
+		}
+
+		@Override
+		public int getType() {
+			return type;
+		}
+
+		@Override
+		public String getValue() {
+			return value;
+		}
+
+		@Override
+		public String getKey() {
+			return key;
+		}
+
+		@Override
+		public String toString() {
+			return "MetaJSONImpl{key=" + key + ", value=" + value + ", type=" + type + "}";
+		}
+
+		static Meta[] getMetas(final JSONArray array) throws JSONException {
+			final int length = array.length();
+			final Meta[] metas = new Meta[length];
+			for (int i = 0; i < length; i++) {
+				metas[i] = new MetaJSONImpl(array.getJSONObject(i));
+			}
+			return metas;
+		}
+	}
 }
