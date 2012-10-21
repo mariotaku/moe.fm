@@ -22,26 +22,26 @@ public class MarqueeTextView extends TextView {
 	}
 
 	@Override
-	protected void onFocusChanged(final boolean focused, final int direction, final Rect previouslyFocusedRect) {
-		if(focused) {
-			super.onFocusChanged(focused, direction, previouslyFocusedRect);
-		}
+	public boolean isFocused() {
+		return true;
 	}
 
 	@Override
 	public void onWindowFocusChanged(final boolean hasWindowFocus) {
-		if(hasWindowFocus) {
+		if (hasWindowFocus) {
 			super.onWindowFocusChanged(hasWindowFocus);
 		}
 	}
 
 	@Override
-	public boolean isFocused() {
-		return true;
-	}
-	
-	@Override
-	public void setEllipsize(TextUtils.TruncateAt truncateAt) {
+	public void setEllipsize(final TextUtils.TruncateAt truncateAt) {
 		// Ignore
+	}
+
+	@Override
+	protected void onFocusChanged(final boolean focused, final int direction, final Rect previouslyFocusedRect) {
+		if (focused) {
+			super.onFocusChanged(focused, direction, previouslyFocusedRect);
+		}
 	}
 }

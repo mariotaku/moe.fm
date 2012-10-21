@@ -16,16 +16,12 @@
 
 package moefou4j;
 
+import java.io.IOException;
 import java.util.List;
 
 import moefou4j.http.HttpRequest;
 import moefou4j.http.HttpResponse;
 import moefou4j.http.HttpResponseCode;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import java.io.IOException;
 
 /**
  * An exception class that will be thrown when TwitterAPI calls are failed.<br>
@@ -35,17 +31,14 @@ import java.io.IOException;
  * @author Yusuke Yamamoto - yusuke at mac.com
  */
 public class MoefouException extends Exception implements MoefouResponse, HttpResponseCode {
-	
+
 	private static final long serialVersionUID = 5876311940770455282L;
 
 	private int statusCode = -1;
 
 	private HttpResponse response;
 	private HttpRequest request;
-	private final String requestPath = null;
-
 	boolean nested = false;
-
 	private Information information;
 
 	public MoefouException(final Exception cause) {
@@ -71,28 +64,32 @@ public class MoefouException extends Exception implements MoefouResponse, HttpRe
 		statusCode = res != null ? res.getStatusCode() : -1;
 	}
 
-	public MoefouException(final String message, final Throwable cause) {
-		super(message, cause);
-	}
-
 	public MoefouException(final String message, final Information information) {
 		super(message);
 		this.information = information;
 	}
-	
+
+	public MoefouException(final String message, final Throwable cause) {
+		super(message, cause);
+	}
+
 	@Override
-	public boolean equals(final Object o) {
-		if (this == o) return true;
-		if (!(o instanceof MoefouException)) return false;
-
-		final MoefouException that = (MoefouException) o;
-
-		if (nested != that.nested) return false;
-		if (statusCode != that.statusCode) return false;
-		if (requestPath != null ? !requestPath.equals(that.requestPath) : that.requestPath != null) return false;
-		if (response != null ? !response.equals(that.response) : that.response != null) return false;
-		if (request != null ? !request.equals(that.request) : that.request != null) return false;
-
+	public boolean equals(final Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (!(obj instanceof MoefouException)) return false;
+		final MoefouException other = (MoefouException) obj;
+		if (information == null) {
+			if (other.information != null) return false;
+		} else if (!information.equals(other.information)) return false;
+		if (nested != other.nested) return false;
+		if (request == null) {
+			if (other.request != null) return false;
+		} else if (!request.equals(other.request)) return false;
+		if (response == null) {
+			if (other.response != null) return false;
+		} else if (!response.equals(other.response)) return false;
+		if (statusCode != other.statusCode) return false;
 		return true;
 	}
 
@@ -157,11 +154,13 @@ public class MoefouException extends Exception implements MoefouResponse, HttpRe
 
 	@Override
 	public int hashCode() {
-		int result = statusCode;
-		result = 31 * result + (request != null ? request.hashCode() : 0);
-		result = 31 * result + (response != null ? response.hashCode() : 0);
-		result = 31 * result + (requestPath != null ? requestPath.hashCode() : 0);
-		result = 31 * result + (nested ? 1 : 0);
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (information == null ? 0 : information.hashCode());
+		result = prime * result + (nested ? 1231 : 1237);
+		result = prime * result + (request == null ? 0 : request.hashCode());
+		result = prime * result + (response == null ? 0 : response.hashCode());
+		result = prime * result + statusCode;
 		return result;
 	}
 
@@ -173,6 +172,12 @@ public class MoefouException extends Exception implements MoefouResponse, HttpRe
 	 */
 	public boolean isCausedByNetworkIssue() {
 		return getCause() instanceof IOException;
+	}
+
+	@Override
+	public String toString() {
+		return "MoefouException{statusCode=" + statusCode + ", response=" + response + ", request=" + request
+				+ ", nested=" + nested + ", information=" + information + "}";
 	}
 
 	void setNested() {

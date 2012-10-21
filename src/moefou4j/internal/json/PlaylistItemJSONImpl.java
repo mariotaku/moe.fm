@@ -21,7 +21,7 @@ import org.json.JSONObject;
 final class PlaylistItemJSONImpl implements PlaylistItem {
 
 	private static final long serialVersionUID = 3866860449112856833L;
-	
+
 	private long upId;
 	private long wikiId;
 	private String title;

@@ -19,5 +19,5 @@ public interface SearchMethods {
 	 * @throws MoefouException
 	 */
 	public ResponseList<Wiki> searchWikis(Wiki.Type[] type, Paging paging, String... keywords) throws MoefouException;
-	
+
 }

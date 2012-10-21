@@ -16,5 +16,6 @@
 	<string name="quit">Quit</string>
 	<string name="continue_text">Continue</string>
 	<string name="network_confirm">You are using mobile network.</string>
+	<string name="equalizer">Equalizer</string>
 
 </resources>

@@ -10,17 +10,21 @@ interface IMoefouService {
 	boolean next();
 	boolean prev();
 	boolean isPlaying();
+	boolean isPreparing();
 	boolean isPrepared();
 	boolean seekTo(int msec);
-	boolean addListToQueue(in List<ParcelablePlaylistItem> items);
-	boolean addToQueue(in ParcelablePlaylistItem item);
-	void clearQueue();
+	boolean addAll(in List<ParcelablePlaylistItem> items);
+	boolean add(in ParcelablePlaylistItem item);
+	boolean update(in ParcelablePlaylistItem item);
+	boolean remove(in ParcelablePlaylistItem item);
+	void clear();
 	int getCurrentPosition();
 	int getDuration();
 	void shuffle();
 	List<ParcelablePlaylistItem> getPlaylist();
 	int getQueuePosition();
 	ParcelablePlaylistItem getCurrentItem();
+	int getAudioSessionId();
 	void quit();
 
 }

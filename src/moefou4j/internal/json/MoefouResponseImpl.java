@@ -19,7 +19,6 @@ package moefou4j.internal.json;
 import static moefou4j.internal.util.Moefou4JInternalParseUtil.getBoolean;
 import static moefou4j.internal.util.Moefou4JInternalParseUtil.getRawString;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -48,7 +47,7 @@ import org.json.JSONObject;
 
 	public MoefouResponseImpl() {
 	}
-	
+
 	public MoefouResponseImpl(final HttpResponse res) throws MoefouException {
 		this(res.asJSONObject());
 	}
@@ -66,7 +65,7 @@ import org.json.JSONObject;
 		try {
 			final JSONObject info_json = json.getJSONObject("response").getJSONObject("information");
 			information = new InformationImpl(info_json);
-			if(getBoolean("has_error", info_json) && !info_json.isNull("msg")) {
+			if (getBoolean("has_error", info_json) && !info_json.isNull("msg")) {
 				final JSONArray msg_json = info_json.getJSONArray("msg");
 				if (msg_json.length() > 0) throw new MoefouException(msg_json.getString(0), information);
 				throw new MoefouException("Unknown error", information);
@@ -112,8 +111,7 @@ import org.json.JSONObject;
 
 		@Override
 		public String toString() {
-			return "InformationImpl{parameters=" + parameters + ", messages="
-					+ ", request=" + request + "}";
+			return "InformationImpl{parameters=" + parameters + ", messages=" + ", request=" + request + "}";
 		}
 	}
 

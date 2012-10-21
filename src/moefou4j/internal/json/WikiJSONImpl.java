@@ -1,6 +1,5 @@
 package moefou4j.internal.json;
 
-import static moefou4j.internal.util.Moefou4JInternalParseUtil.getInt;
 import static moefou4j.internal.util.Moefou4JInternalParseUtil.getLong;
 import static moefou4j.internal.util.Moefou4JInternalParseUtil.getRawString;
 import static moefou4j.internal.util.Moefou4JInternalParseUtil.getURLFromString;
@@ -11,6 +10,7 @@ import java.util.Date;
 
 import moefou4j.Cover;
 import moefou4j.Favorite;
+import moefou4j.Meta;
 import moefou4j.MoefouException;
 import moefou4j.ResponseList;
 import moefou4j.Wiki;
@@ -38,56 +38,21 @@ final class WikiJSONImpl extends MoefouResponseImpl implements Wiki {
 	private Cover cover;
 	private Favorite userFavorite;
 
-	public WikiJSONImpl(final HttpResponse res) throws MoefouException {
-		super(res);
-		try {
-			init(res.asJSONObject().getJSONObject("response").getJSONObject("wiki"));
-		} catch (JSONException e) {
-			throw new MoefouException(e);
-		}
-	}
-	
-	public WikiJSONImpl(final JSONObject json) throws MoefouException {
-		init(json);
-	}
-
 	WikiJSONImpl() {
 
 	}
-	
-	private void init(final JSONObject json) throws MoefouException {
-		id = getLong("wiki_id", json);
-		title = getRawString("wiki_title", json);
-		titleEncode = getRawString("wiki_title_encode", json);
-		name = getRawString("wiki_name", json);
-		parent = getLong("wiki_parent", json);
-		date = new Date(getLong("wiki_date", json) * 1000);
-		modified = new Date(getLong("wiki_modified", json) * 1000);
-		modifiedUser = getLong("wiki_modified_user", json);
-		types = Type.fromCommaSepratedString(getRawString("wiki_type", json));
-		url = getURLFromString("wiki_url", json);
-		fmUrl = getURLFromString("wiki_fm_url", json);
-		if (!json.isNull("cover")) {
-			try {
-				cover = new CoverJSONImpl(json.getJSONObject("cover"));
-			} catch (final JSONException jsone) {
-				throw new MoefouException(jsone);
-			}
+
+	WikiJSONImpl(final HttpResponse res) throws MoefouException {
+		super(res);
+		try {
+			init(res.asJSONObject().getJSONObject("response").getJSONObject("wiki"));
+		} catch (final JSONException e) {
+			throw new MoefouException(e);
 		}
-		if (!json.isNull("wiki_user_fav")) {
-			try {
-				userFavorite = new FavoriteJSONImpl(json.getJSONObject("wiki_user_fav"));
-			} catch (final JSONException jsone) {
-				throw new MoefouException(jsone);
-			}
-		}
-		if (!json.isNull("wiki_meta")) {
-			try {
-				metas = MetaJSONImpl.getMetas(json.getJSONArray("wiki_meta"));
-			} catch (JSONException jsone) {
-				throw new MoefouException(jsone);
-			}
-		}
+	}
+
+	WikiJSONImpl(final JSONObject json) throws MoefouException {
+		init(json);
 	}
 
 	@Override
@@ -106,6 +71,7 @@ final class WikiJSONImpl extends MoefouResponseImpl implements Wiki {
 			if (other.fmUrl != null) return false;
 		} else if (!fmUrl.equals(other.fmUrl)) return false;
 		if (id != other.id) return false;
+		if (!Arrays.equals(metas, other.metas)) return false;
 		if (modified == null) {
 			if (other.modified != null) return false;
 		} else if (!modified.equals(other.modified)) return false;
@@ -141,7 +107,7 @@ final class WikiJSONImpl extends MoefouResponseImpl implements Wiki {
 	}
 
 	@Override
-	public URL getFMURL() {
+	public URL getFMUrl() {
 		return fmUrl;
 	}
 
@@ -191,7 +157,7 @@ final class WikiJSONImpl extends MoefouResponseImpl implements Wiki {
 	}
 
 	@Override
-	public URL getURL() {
+	public URL getUrl() {
 		return url;
 	}
 
@@ -208,6 +174,7 @@ final class WikiJSONImpl extends MoefouResponseImpl implements Wiki {
 		result = prime * result + (date == null ? 0 : date.hashCode());
 		result = prime * result + (fmUrl == null ? 0 : fmUrl.hashCode());
 		result = prime * result + (int) (id ^ id >>> 32);
+		result = prime * result + Arrays.hashCode(metas);
 		result = prime * result + (modified == null ? 0 : modified.hashCode());
 		result = prime * result + (int) (modifiedUser ^ modifiedUser >>> 32);
 		result = prime * result + (name == null ? 0 : name.hashCode());
@@ -223,13 +190,47 @@ final class WikiJSONImpl extends MoefouResponseImpl implements Wiki {
 	@Override
 	public String toString() {
 		return "WikiJSONImpl{id=" + id + ", title=" + title + ", titleEncode=" + titleEncode + ", name=" + name
-				+ ", types=" + Arrays.toString(types) + ", parent=" + parent + ", date=" + date + ", modified="
-				+ modified + ", modifiedUser=" + modifiedUser + ", fmUrl=" + fmUrl + ", url=" + url + ", cover="
-				+ cover + ", userFavorite=" + userFavorite + ", metas=" + Arrays.toString(metas) + "}";
+				+ ", types=" + Arrays.toString(types) + ", metas=" + Arrays.toString(metas) + ", parent=" + parent
+				+ ", date=" + date + ", modified=" + modified + ", modifiedUser=" + modifiedUser + ", fmUrl=" + fmUrl
+				+ ", url=" + url + ", cover=" + cover + ", userFavorite=" + userFavorite + "}";
 	}
 
-	public static ResponseList<Wiki> createWikisList(final HttpResponse res)
-			throws MoefouException {
+	private void init(final JSONObject json) throws MoefouException {
+		id = getLong("wiki_id", json);
+		title = getRawString("wiki_title", json);
+		titleEncode = getRawString("wiki_title_encode", json);
+		name = getRawString("wiki_name", json);
+		parent = getLong("wiki_parent", json);
+		date = new Date(getLong("wiki_date", json) * 1000);
+		modified = new Date(getLong("wiki_modified", json) * 1000);
+		modifiedUser = getLong("wiki_modified_user", json);
+		types = Type.fromCommaSepratedString(getRawString("wiki_type", json));
+		url = getURLFromString("wiki_url", json);
+		fmUrl = getURLFromString("wiki_fm_url", json);
+		if (!json.isNull("wiki_cover")) {
+			try {
+				cover = new CoverJSONImpl(json.getJSONObject("wiki_cover"));
+			} catch (final JSONException jsone) {
+				throw new MoefouException(jsone);
+			}
+		}
+		if (!json.isNull("wiki_user_fav")) {
+			try {
+				userFavorite = new FavoriteJSONImpl(json.getJSONObject("wiki_user_fav"));
+			} catch (final JSONException jsone) {
+				throw new MoefouException(jsone);
+			}
+		}
+		if (!json.isNull("wiki_meta")) {
+			try {
+				metas = MetaJSONImpl.getMetas(json.getJSONArray("wiki_meta"));
+			} catch (final JSONException jsone) {
+				throw new MoefouException(jsone);
+			}
+		}
+	}
+
+	public static ResponseList<Wiki> createWikisList(final HttpResponse res) throws MoefouException {
 		try {
 			final JSONObject json = res.asJSONObject();
 			final ResponseList<Wiki> list = new ResponseListImpl<Wiki>(json);
@@ -242,48 +243,6 @@ final class WikiJSONImpl extends MoefouResponseImpl implements Wiki {
 			return list;
 		} catch (final JSONException e) {
 			throw new MoefouException(e);
-		}
-	}
-
-	final static class MetaJSONImpl implements Meta {
-
-		private int type;
-		private String value;
-		private String key;
-
-		MetaJSONImpl(final JSONObject json) {
-			key = getRawString("meta_key", json);
-			value = getRawString("meta_value", json);
-			type = getInt("meta_type", json);
-		}
-
-		@Override
-		public int getType() {
-			return type;
-		}
-
-		@Override
-		public String getValue() {
-			return value;
-		}
-
-		@Override
-		public String getKey() {
-			return key;
-		}
-
-		@Override
-		public String toString() {
-			return "MetaJSONImpl{key=" + key + ", value=" + value + ", type=" + type + "}";
-		}
-
-		static Meta[] getMetas(final JSONArray array) throws JSONException {
-			final int length = array.length();
-			final Meta[] metas = new Meta[length];
-			for (int i = 0; i < length; i++) {
-				metas[i] = new MetaJSONImpl(array.getJSONObject(i));
-			}
-			return metas;
 		}
 	}
 }

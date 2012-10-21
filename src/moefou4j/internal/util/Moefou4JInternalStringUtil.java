@@ -28,6 +28,27 @@ public class Moefou4JInternalStringUtil {
 		throw new AssertionError();
 	}
 
+	public static long[] getLongArrayfromString(final String string, final char token) {
+		if (string == null) return new long[0];
+		final String[] items_string_array = string.split(String.valueOf(token));
+		final ArrayList<Long> items_list = new ArrayList<Long>();
+		for (final String id_string : items_string_array) {
+			try {
+				items_list.add(Long.parseLong(id_string));
+			} catch (final NumberFormatException e) {
+				// Ignore.
+			}
+		}
+		final int list_size = items_list.size();
+		final long[] array = new long[list_size];
+		for (int i = 0; i < list_size; i++) {
+			array[i] = items_list.get(i);
+		}
+		return array;
+	}
+
+	// for JDK1.4 compatibility
+
 	public static String join(final int[] follows) {
 		final StringBuffer buf = new StringBuffer(11 * follows.length);
 		for (final int follow : follows) {
@@ -39,22 +60,20 @@ public class Moefou4JInternalStringUtil {
 		return buf.toString();
 	}
 
-	// for JDK1.4 compatibility
-
-	public static String join(final long[] follows) {
-		final StringBuffer buf = new StringBuffer(11 * follows.length);
-		for (final long follow : follows) {
-			if (0 != buf.length()) {
-				buf.append(",");
+	public static String join(final long[] array, final char token) {
+		final StringBuilder builder = new StringBuilder();
+		for (final long item : array) {
+			if (0 != builder.length()) {
+				builder.append(token);
 			}
-			buf.append(follow);
+			builder.append(item);
 		}
-		return buf.toString();
+		return builder.toString();
 	}
 
-	public static String join(final String[] track, final char token) {
+	public static String join(final String[] array, final char token) {
 		final StringBuilder builder = new StringBuilder();
-		for (final String str : track) {
+		for (final String str : array) {
 			if (0 != builder.length()) {
 				builder.append(token);
 			}

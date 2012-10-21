@@ -17,7 +17,7 @@
 package moefou4j.internal.json;
 
 import static moefou4j.internal.util.Moefou4JInternalParseUtil.getInt;
- 
+
 import java.util.ArrayList;
 
 import moefou4j.MoefouException;
@@ -95,7 +95,7 @@ class ResponseListImpl<T> extends ArrayList<T> implements ResponseList<T> {
 		@Override
 		public String toString() {
 			return "PlaylistInformationImpl{itemCount=" + itemCount + ", page=" + page + ", parameters=" + parameters
-				+ ", request=" + request + "}";
+					+ ", request=" + request + "}";
 		}
 
 	}

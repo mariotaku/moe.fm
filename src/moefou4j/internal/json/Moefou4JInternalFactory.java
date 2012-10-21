@@ -16,12 +16,15 @@
  */
 package moefou4j.internal.json;
 
+import moefou4j.FavoriteResponse;
 import moefou4j.MoefouException;
 import moefou4j.Playlist;
 import moefou4j.ResponseList;
+import moefou4j.ResponseMessage;
+import moefou4j.Sub;
+import moefou4j.User;
 import moefou4j.Wiki;
 import moefou4j.http.HttpResponse;
-import moefou4j.ResponseMessage;
 
 /**
  * @author Yusuke Yamamoto - yusuke at mac.com
@@ -31,10 +34,18 @@ public interface Moefou4JInternalFactory {
 
 	public Playlist createPlayist(HttpResponse res) throws MoefouException;
 
+	public ResponseMessage createResponseMessage(HttpResponse res) throws MoefouException;
+
+	public Sub createSub(HttpResponse res) throws MoefouException;
+
+	public FavoriteResponse<Sub> createSubFavoriteResponse(HttpResponse res) throws MoefouException;
+
+	public User createUser(HttpResponse res) throws MoefouException;
+
+	public Wiki createWiki(HttpResponse res) throws MoefouException;
+
+	public FavoriteResponse<Wiki> createWikiFavoriteResponse(HttpResponse res) throws MoefouException;
+
 	public ResponseList<Wiki> createWikisList(HttpResponse res) throws MoefouException;
 
-	public ResponseMessage createResponseMessage(HttpResponse res) throws MoefouException;
-	
-	public Wiki createWiki(HttpResponse res) throws MoefouException;
-	
 }

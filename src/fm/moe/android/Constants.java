@@ -2,6 +2,8 @@ package fm.moe.android;
 
 public interface Constants {
 
+	public static final String LOGTAG = "Moe.FM";
+
 	public static final String SHARED_PREFERENCES_NAME = "preferences";
 
 	public static final String MOEFOU_CONSUMER_KEY = "9b6292bc2a31180b35bee283e6a4a4ca050780a2e";
@@ -31,7 +33,8 @@ public interface Constants {
 	public static final String BROADCAST_ON_PAUSE = INTENT_ACTION_PREFIX + "ON_PAUSE";
 	public static final String BROADCAST_ON_START = INTENT_ACTION_PREFIX + "ON_START";
 	public static final String BROADCAST_ON_STOP = INTENT_ACTION_PREFIX + "ON_STOP";
-	public static final String BROADCAST_ON_CURRENT_ITEM_CHANGED = INTENT_ACTION_PREFIX + "ON_CURRENT_ITEM_CHANGED";
+	public static final String BROADCAST_ON_CURRENT_ITEM_CHANGE = INTENT_ACTION_PREFIX + "ON_CURRENT_ITEM_CHANGE";
+	public static final String BROADCAST_ON_PREPARE_STATE_CHANGE = INTENT_ACTION_PREFIX + "ON_PREPARE_STATE_CHANGE";
 
 	public static final int NOTIFICATION_ID_NOW_PLAYING = 1;
 }

@@ -1,8 +1,14 @@
 package fm.moe.android.activity;
 
+import moefou4j.FavoriteResponse;
+import moefou4j.Moefou;
+import moefou4j.MoefouException;
+import moefou4j.Sub;
+import moefou4j.api.SubMethods;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -11,8 +17,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.media.AudioManager;
+import android.media.audiofx.AudioEffect;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -21,6 +30,7 @@ import android.os.SystemClock;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -33,6 +43,7 @@ import fm.moe.android.util.LazyImageLoader;
 import fm.moe.android.util.MediaPlayerStateListener;
 import fm.moe.android.util.ServiceUtils;
 import fm.moe.android.util.ThemeUtil;
+import fm.moe.android.util.Utils;
 import fm.moe.android.view.RepeatingImageButton;
 
 public class NowPlayingActivity extends BaseActivity implements View.OnClickListener,
@@ -45,7 +56,7 @@ public class NowPlayingActivity extends BaseActivity implements View.OnClickList
 	private ServiceUtils.ServiceToken mToken;
 
 	private ImageView mAlbumCoverView;
-	private ImageButton mPlayPauseButton;
+	private ImageButton mPlayPauseButton, mFavoriteButton, mTrashButton;
 	private RepeatingImageButton mNextFwdButton;
 	private TextView mTitleView, mArtistView;
 	private ProgressBar mProgress;
@@ -54,12 +65,14 @@ public class NowPlayingActivity extends BaseActivity implements View.OnClickList
 	private Runnable mTicker;
 	private boolean mTickerStopped;
 
+	private Moefou mMoefou;
+
 	private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
 
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			final String action = intent.getAction();
-			if (BROADCAST_ON_CURRENT_ITEM_CHANGED.equals(action)) {
+			if (BROADCAST_ON_CURRENT_ITEM_CHANGE.equals(action)) {
 				updateNowPlayingInfo();
 			}
 		}
@@ -100,6 +113,13 @@ public class NowPlayingActivity extends BaseActivity implements View.OnClickList
 		public void onPrepared(final int audio_session_id) {
 			setPlayPauseButton();
 			updateNowPlayingInfo();
+			updatePrepareState();
+		}
+
+		@Override
+		public void onPrepareStateChange(final int audio_session_id) {
+			updatePrepareState();
+
 		}
 
 		@Override
@@ -122,15 +142,31 @@ public class NowPlayingActivity extends BaseActivity implements View.OnClickList
 
 	@Override
 	public void onClick(final View v) {
+		if (mService == null) return;
 		switch (v.getId()) {
 			case R.id.play_pause: {
 				togglePlayPause();
 				break;
 			}
 			case R.id.next_fwd: {
-				if (mService == null) return;
 				try {
 					mService.next();
+				} catch (final RemoteException e) {
+					e.printStackTrace();
+				}
+				break;
+			}
+			case R.id.favorite: {
+				try {
+					new ToggleFavoriteTask(mMoefou, mService, mService.getCurrentItem()).execute();
+				} catch (final RemoteException e) {
+					e.printStackTrace();
+				}
+				break;
+			}
+			case R.id.trash: {
+				try {
+					new IgnoreTrackTask(mMoefou, mService, mService.getCurrentItem()).execute();
 				} catch (final RemoteException e) {
 					e.printStackTrace();
 				}
@@ -143,6 +179,8 @@ public class NowPlayingActivity extends BaseActivity implements View.OnClickList
 	public void onContentChanged() {
 		super.onContentChanged();
 		mPlayPauseButton = (ImageButton) findViewById(R.id.play_pause);
+		mFavoriteButton = (ImageButton) findViewById(R.id.favorite);
+		mTrashButton = (ImageButton) findViewById(R.id.trash);
 		mNextFwdButton = (RepeatingImageButton) findViewById(R.id.next_fwd);
 		mAlbumCoverView = (ImageView) findViewById(R.id.album_cover);
 		mTitleView = (TextView) findViewById(R.id.title);
@@ -154,11 +192,13 @@ public class NowPlayingActivity extends BaseActivity implements View.OnClickList
 	public void onCreate(final Bundle savedInstanceState) {
 		setTheme(ThemeUtil.getTheme(this));
 		mPreferences = getSharedPreferences(SHARED_PREFERENCES_NAME, MODE_PRIVATE);
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		super.onCreate(savedInstanceState);
 		final Resources res = getResources();
 		mCoverLoader = new LazyImageLoader(this, "album_covers", R.drawable.ic_mp_albumart_unknown,
 				res.getDimensionPixelSize(R.dimen.album_cover_size),
 				res.getDimensionPixelSize(R.dimen.album_cover_size), 3);
+		mMoefou = Utils.getMoefouInstance(this);
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		if (mPreferences.getString(PREFERENCE_KEY_ACCESS_TOKEN, null) == null
 				|| mPreferences.getString(PREFERENCE_KEY_ACCESS_TOKEN_SECRET, null) == null) {
@@ -170,6 +210,8 @@ public class NowPlayingActivity extends BaseActivity implements View.OnClickList
 		setContentView(R.layout.now_playing);
 		mPlayPauseButton.setOnClickListener(this);
 		mNextFwdButton.setOnClickListener(this);
+		mFavoriteButton.setOnClickListener(this);
+		mTrashButton.setOnClickListener(this);
 		mNextFwdButton.setRepeatListener(this, 500);
 	}
 
@@ -181,12 +223,13 @@ public class NowPlayingActivity extends BaseActivity implements View.OnClickList
 
 	@Override
 	public void onDestroy() {
-		try {
-			if (mService != null && !mService.isPlaying()) {
-				mService.quit();
+		if (mService != null) {
+			try {
+				if (!mService.isPlaying() && !mService.isPreparing()) {
+					mService.quit();
+				}
+			} catch (final RemoteException e) {
 			}
-		} catch (final RemoteException e) {
-			e.printStackTrace();
 		}
 		super.onDestroy();
 	}
@@ -214,6 +257,18 @@ public class NowPlayingActivity extends BaseActivity implements View.OnClickList
 				ThemeUtil.setTheme(this, "graphited");
 				break;
 			}
+			case R.id.equalizer: {
+				try {
+					final Intent intent = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
+					intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, mService.getAudioSessionId());
+					startActivityForResult(intent, 0);
+				} catch (final RemoteException e) {
+					return false;
+				} catch (final ActivityNotFoundException e) {
+					return false;
+				}
+				return true;
+			}
 			case R.id.settings: {
 				startActivity(new Intent(this, SettingsActivity.class));
 				return true;
@@ -240,30 +295,34 @@ public class NowPlayingActivity extends BaseActivity implements View.OnClickList
 	@Override
 	public boolean onPrepareOptionsMenu(final Menu menu) {
 		final int theme_res = ThemeUtil.getTheme(this);
-		final MenuItem theme_item;
+		final MenuItem item_equalizer = menu.findItem(R.id.equalizer);
+		final MenuItem item_theme;
 		switch (theme_res) {
 			case R.style.Theme_Gray: {
-				theme_item = menu.findItem(R.id.theme_gray);
+				item_theme = menu.findItem(R.id.theme_gray);
 				break;
 			}
 			case R.style.Theme_Sandy: {
-				theme_item = menu.findItem(R.id.theme_sandy);
+				item_theme = menu.findItem(R.id.theme_sandy);
 				break;
 			}
 			case R.style.Theme_Woody: {
-				theme_item = menu.findItem(R.id.theme_woody);
+				item_theme = menu.findItem(R.id.theme_woody);
 				break;
 			}
 			case R.style.Theme_Graphited: {
-				theme_item = menu.findItem(R.id.theme_graphited);
+				item_theme = menu.findItem(R.id.theme_graphited);
 				break;
 			}
 			default: {
-				theme_item = menu.findItem(R.id.theme_default);
+				item_theme = menu.findItem(R.id.theme_default);
 				break;
 			}
 		}
-		theme_item.setChecked(true);
+		item_theme.setChecked(true);
+		final Intent equalizer_intent = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
+		final ResolveInfo info = getPackageManager().resolveActivity(equalizer_intent, 0);
+		item_equalizer.setVisible(info != null);
 		return super.onPrepareOptionsMenu(menu);
 	}
 
@@ -277,6 +336,7 @@ public class NowPlayingActivity extends BaseActivity implements View.OnClickList
 		mService = IMoefouService.Stub.asInterface(service);
 		updateNowPlayingInfo();
 		setPlayPauseButton();
+		updatePrepareState();
 	}
 
 	@Override
@@ -296,7 +356,7 @@ public class NowPlayingActivity extends BaseActivity implements View.OnClickList
 		super.onStart();
 		mToken = ServiceUtils.bindService(this, new Intent(this, MoefouService.class), this);
 		MediaPlayerStateListener.register(this, mMediaPlayerStateListener);
-		final IntentFilter filter = new IntentFilter(BROADCAST_ON_CURRENT_ITEM_CHANGED);
+		final IntentFilter filter = new IntentFilter(BROADCAST_ON_CURRENT_ITEM_CHANGE);
 		registerReceiver(mReceiver, filter);
 		mTickerStopped = false;
 		mHandler = new Handler();
@@ -350,6 +410,7 @@ public class NowPlayingActivity extends BaseActivity implements View.OnClickList
 	private void togglePlayPause() {
 		if (mService == null) return;
 		try {
+			if (mService.isPreparing()) return;
 			if (!mService.isPrepared()) {
 				mService.play(mService.getQueuePosition());
 			} else {
@@ -378,6 +439,15 @@ public class NowPlayingActivity extends BaseActivity implements View.OnClickList
 			mCoverLoader.displayImage(item.getCoverUrl(), mAlbumCoverView);
 			mTitleView.setText(item.getTitle());
 			mArtistView.setText(item.getArtist());
+			mFavoriteButton.setImageResource(item.isFavorite() ? R.drawable.btn_heart_activated : R.drawable.btn_heart);
+		} catch (final RemoteException e) {
+			e.printStackTrace();
+		}
+	}
+
+	void updatePrepareState() {
+		try {
+			setProgressBarIndeterminateVisibility(mService.isPreparing());
 		} catch (final RemoteException e) {
 			e.printStackTrace();
 		}
@@ -410,5 +480,76 @@ public class NowPlayingActivity extends BaseActivity implements View.OnClickList
 			return builder.create();
 		}
 
+	}
+
+	static class IgnoreTrackTask extends AsyncTask<Void, Void, FavoriteResponse<Sub>> {
+
+		private final ParcelablePlaylistItem item;
+		private final SubMethods moefou;
+		private final IMoefouService service;
+
+		IgnoreTrackTask(final Moefou moefou, final IMoefouService service, final ParcelablePlaylistItem item) {
+			this.item = item;
+			this.moefou = moefou;
+			this.service = service;
+		}
+
+		@Override
+		protected FavoriteResponse<Sub> doInBackground(final Void... args) {
+			try {
+				return moefou.addSubFavorite(Sub.Type.fromString(item.getType()), item.getSubId(), 2);
+			} catch (final MoefouException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(final FavoriteResponse<Sub> result) {
+			if (result != null && service != null) {
+				try {
+					service.remove(item);
+				} catch (final RemoteException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	static class ToggleFavoriteTask extends AsyncTask<Void, Void, FavoriteResponse<Sub>> {
+
+		private final ParcelablePlaylistItem item;
+		private final SubMethods moefou;
+		private final IMoefouService service;
+
+		ToggleFavoriteTask(final Moefou moefou, final IMoefouService service, final ParcelablePlaylistItem item) {
+			this.item = item;
+			this.moefou = moefou;
+			this.service = service;
+		}
+
+		@Override
+		protected FavoriteResponse<Sub> doInBackground(final Void... args) {
+			try {
+				if (!item.isFavorite())
+					return moefou.addSubFavorite(Sub.Type.fromString(item.getType()), item.getSubId(), 1);
+				else
+					return moefou.deleteSubFavorite(Sub.Type.fromString(item.getType()), item.getSubId());
+			} catch (final MoefouException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(final FavoriteResponse<Sub> result) {
+			if (result != null && service != null) {
+				try {
+					service.update(new ParcelablePlaylistItem(item, !item.isFavorite()));
+				} catch (final RemoteException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }

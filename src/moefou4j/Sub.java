@@ -11,13 +11,27 @@ package moefou4j;
  * 
  */
 import java.io.Serializable;
+import java.net.URL;
+import java.util.Date;
 
 public interface Sub extends Serializable {
+
+	public String getAbout();
+
+	public Date getDate();
+
+	public URL getFMUrl();
 
 	/**
 	 * @return 子条目id号
 	 */
 	public long getId();
+
+	public Meta[] getMetas();
+
+	public Date getModified();
+
+	public int getOrder();
 
 	/**
 	 * @return 父级子条目，在当前系统中不启用
@@ -28,6 +42,25 @@ public interface Sub extends Serializable {
 	 * @return 所属条目的id
 	 */
 	public long getParentWiki();
+
+	public String getTitle();
+
+	public String getTitleEncode();
+
+	public Type getType();
+
+	public Upload[] getUploads();
+
+	public URL getUrl();
+
+	public Favorite getUserFavorite();
+
+	public String getViewTitle();
+
+	/**
+	 * @return 子条目所属的条目
+	 */
+	public Wiki getWiki();
 
 	public static enum Type {
 		SONG("song"), EP("ep");
@@ -53,9 +86,9 @@ public interface Sub extends Serializable {
 			return types;
 		}
 
-		public static Type fromString(final String type_string) {
-			if ("ep".equals(type_string)) return EP;
-			if ("song".equals(type_string)) return SONG;
+		public static Type fromString(final String type) {
+			if ("ep".equals(type)) return EP;
+			if ("song".equals(type)) return SONG;
 			return null;
 		}
 
@@ -72,5 +105,49 @@ public interface Sub extends Serializable {
 			return array;
 		}
 	}
+
+	public static interface Upload {
+
+		/**
+		 * @return 比特率
+		 */
+		public int getBitrate();
+
+		public Date getDate();
+
+		/**
+		 * @return 文件实际大小
+		 */
+		public int getFileSize();
+
+		public long getId();
+
+		/**
+		 * @return 时长（单位秒）
+		 */
+		public double getLength();
+
+		public long getObjectId();
+
+		public Type getObjectType();
+
+		/**
+		 * @return 文件大小，单位 KB，跟实际大小有出入
+		 */
+		public int getSize();
+
+		/**
+		 * @return 时长（格式化）
+		 */
+		public String getTime();
+
+		public String getType();
+
+		/**
+		 * @return 上传的用户
+		 */
+		public long getUid();
+
+		public String getUri();
+	}
 }
-	

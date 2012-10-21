@@ -42,6 +42,10 @@ public final class ParcelablePlaylistItem implements Parcelable {
 
 	private final URL url;
 
+	private final boolean isFavorite;
+
+	private String type;
+
 	public ParcelablePlaylistItem(final JSONObject json) throws JSONException {
 		upId = Long.valueOf(toString(json.get("upId")));
 		url = parseUrl(toString(json.get("url")));
@@ -49,6 +53,19 @@ public final class ParcelablePlaylistItem implements Parcelable {
 		artist = toString(json.get("artist"));
 		coverUrl = parseUrl(toString(json.get("coverUrl")));
 		subId = Long.valueOf(toString(json.get("subId")));
+		isFavorite = Boolean.valueOf(toString(json.get("isFavorite")));
+		type = toString(json.get("type"));
+	}
+
+	public ParcelablePlaylistItem(final ParcelablePlaylistItem item, final boolean isFavorite) {
+		upId = item.getUpId();
+		url = item.getUrl();
+		title = item.getTitle();
+		artist = item.getArtist();
+		coverUrl = item.getCoverUrl();
+		subId = item.getSubId();
+		this.isFavorite = isFavorite;
+		type = item.getType();
 	}
 
 	public ParcelablePlaylistItem(final PlaylistItem item) {
@@ -59,6 +76,8 @@ public final class ParcelablePlaylistItem implements Parcelable {
 		final Cover cover = item != null ? item.getCover() : null;
 		coverUrl = cover != null ? cover.getSquare() : null;
 		subId = item.getSubId();
+		isFavorite = item.getFavoriteSub() != null;
+		type = item.getSubType().getTypeString();
 	}
 
 	private ParcelablePlaylistItem(final Parcel in) {
@@ -68,6 +87,7 @@ public final class ParcelablePlaylistItem implements Parcelable {
 		artist = in.readString();
 		coverUrl = parseUrl(in.readString());
 		subId = in.readLong();
+		isFavorite = in.readInt() == 1;
 	}
 
 	@Override
@@ -81,7 +101,7 @@ public final class ParcelablePlaylistItem implements Parcelable {
 		if (obj == null) return false;
 		if (!(obj instanceof ParcelablePlaylistItem)) return false;
 		final ParcelablePlaylistItem other = (ParcelablePlaylistItem) obj;
-		if (upId != other.upId) return false;
+		if (subId != other.subId) return false;
 		return true;
 	}
 
@@ -92,13 +112,17 @@ public final class ParcelablePlaylistItem implements Parcelable {
 	public URL getCoverUrl() {
 		return coverUrl;
 	}
-	
+
 	public long getSubId() {
 		return subId;
 	}
 
 	public String getTitle() {
 		return title;
+	}
+
+	public String getType() {
+		return type;
 	}
 
 	public long getUpId() {
@@ -116,8 +140,12 @@ public final class ParcelablePlaylistItem implements Parcelable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (int) (upId ^ upId >>> 32);
+		result = prime * result + (int) (subId ^ subId >>> 32);
 		return result;
+	}
+
+	public boolean isFavorite() {
+		return isFavorite;
 	}
 
 	public JSONObject toJSONObject() throws JSONException {
@@ -128,13 +156,15 @@ public final class ParcelablePlaylistItem implements Parcelable {
 		json.put("artist", artist);
 		json.put("coverUrl", coverUrl);
 		json.put("subId", subId);
+		json.put("isFavorite", isFavorite);
+		json.put("type", type);
 		return json;
 	}
 
 	@Override
 	public String toString() {
 		return "ParcelablePlaylistItem{artist=" + artist + ", coverUrl=" + coverUrl + ", title=" + title + ", upId="
-				+ upId + ", url=" + url + "}";
+				+ upId + ", subId=" + subId + ", url=" + url + ", isFavorite=" + isFavorite + ", type=" + type + "}";
 	}
 
 	@Override
@@ -145,6 +175,8 @@ public final class ParcelablePlaylistItem implements Parcelable {
 		out.writeString(artist);
 		out.writeString(toString(coverUrl));
 		out.writeLong(subId);
+		out.writeInt(isFavorite ? 1 : 0);
+		out.writeString(type);
 	}
 
 	public static List<ParcelablePlaylistItem> createListFromFile(final Context context, final String filename)

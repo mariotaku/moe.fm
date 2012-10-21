@@ -20,6 +20,8 @@ public abstract class MediaPlayerStateListener extends BroadcastReceiver impleme
 
 	public abstract void onPrepared(final int audio_session_id);
 
+	public abstract void onPrepareStateChange(final int audio_session_id);
+
 	@Override
 	public final void onReceive(final Context context, final Intent intent) {
 		final String action = intent.getAction();
@@ -42,6 +44,8 @@ public abstract class MediaPlayerStateListener extends BroadcastReceiver impleme
 			onStop(audio_session_id);
 		} else if (BROADCAST_ON_PAUSE.equals(action)) {
 			onPause(audio_session_id);
+		} else if (BROADCAST_ON_PREPARE_STATE_CHANGE.equals(action)) {
+			onPrepareStateChange(audio_session_id);
 		}
 	}
 
@@ -63,6 +67,7 @@ public abstract class MediaPlayerStateListener extends BroadcastReceiver impleme
 		filter.addAction(BROADCAST_ON_START);
 		filter.addAction(BROADCAST_ON_STOP);
 		filter.addAction(BROADCAST_ON_PAUSE);
+		filter.addAction(BROADCAST_ON_PREPARE_STATE_CHANGE);
 		context.registerReceiver(listener, filter);
 	}
 }

@@ -10,7 +10,7 @@ public interface Wiki extends Serializable {
 
 	public Date getDate();
 
-	public URL getFMURL();
+	public URL getFMUrl();
 
 	public long getId();
 
@@ -30,18 +30,9 @@ public interface Wiki extends Serializable {
 
 	public Type[] getTypes();
 
-	public URL getURL();
+	public URL getUrl();
 
 	public Favorite getUserFavorite();
-
-	public static interface Meta extends Serializable {
-
-		public String getKey();
-
-		public int getType();
-
-		public String getValue();
-	}
 
 	public static enum Type {
 		MUSIC("music"), RADIO("radio"), ANIME("anime"), TV("tv"), OVA("ova"), OAD("oad"), MOVIE("movie");

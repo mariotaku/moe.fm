@@ -1,5 +1,6 @@
 package moefou4j.api;
 
+import moefou4j.FavoriteResponse;
 import moefou4j.MoefouException;
 import moefou4j.Paging;
 import moefou4j.ResponseList;
@@ -12,6 +13,13 @@ import moefou4j.Wiki;
  * 
  */
 public interface WikiMethods {
+
+	public FavoriteResponse<Wiki> addWikiFavorite(Wiki.Type type, long id, int favType) throws MoefouException;
+
+	public FavoriteResponse<Wiki> addWikiFavorite(Wiki.Type type, long id, int favType, String status)
+			throws MoefouException;
+
+	public FavoriteResponse<Wiki> deleteWikiFavorite(Wiki.Type type, long id) throws MoefouException;
 
 	/**
 	 * 根据条件获取条目列表。需要API Key认证或者OAuth认证。
@@ -26,7 +34,7 @@ public interface WikiMethods {
 	 */
 	public ResponseList<Wiki> getWikis(Wiki.Type[] type, Paging paging, String... tags) throws MoefouException;
 
-	public Wiki showWiki(Wiki.Type type, String name) throws MoefouException;
-
 	public Wiki showWiki(Wiki.Type type, long id) throws MoefouException;
+
+	public Wiki showWiki(Wiki.Type type, String name) throws MoefouException;
 }

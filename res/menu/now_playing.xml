@@ -24,6 +24,9 @@
 		</menu>
 	</item>
 	<item
+		android:id="@+id/equalizer"
+		android:title="@string/equalizer"/>
+	<item
 		android:id="@+id/logout"
 		android:title="@string/logout"/>
 	<item

@@ -16,13 +16,16 @@
  */
 package moefou4j.internal.json;
 
+import moefou4j.FavoriteResponse;
 import moefou4j.MoefouException;
 import moefou4j.Playlist;
 import moefou4j.ResponseList;
+import moefou4j.ResponseMessage;
+import moefou4j.Sub;
+import moefou4j.User;
 import moefou4j.Wiki;
 import moefou4j.conf.Configuration;
 import moefou4j.http.HttpResponse;
-import moefou4j.ResponseMessage;
 
 /**
  * @author Yusuke Yamamoto - yusuke at mac.com
@@ -42,18 +45,42 @@ public class Moefou4JInternalJSONFactoryImpl implements Moefou4JInternalFactory 
 	}
 
 	@Override
-	public ResponseMessage createResponseMessage(HttpResponse res) throws MoefouException {
+	public ResponseMessage createResponseMessage(final HttpResponse res) throws MoefouException {
 		return new ResponseMessageJSONImpl(res);
 	}
-	
+
 	@Override
-	public Wiki createWiki(HttpResponse res) throws MoefouException {
+	public Sub createSub(final HttpResponse res) throws MoefouException {
+		return new SubJSONImpl(res);
+	}
+
+	@Override
+	public FavoriteResponse<Sub> createSubFavoriteResponse(final HttpResponse res) throws MoefouException {
+		return new SubFavoriteResponseJSONImpl(res);
+	}
+
+	@Override
+	public User createUser(final HttpResponse res) throws MoefouException {
+		return new UserJSONImpl(res);
+	}
+
+	@Override
+	public Wiki createWiki(final HttpResponse res) throws MoefouException {
 		return new WikiJSONImpl(res);
+	}
+
+	@Override
+	public FavoriteResponse<Wiki> createWikiFavoriteResponse(final HttpResponse res) throws MoefouException {
+		return new WikiFavoriteResponseJSONImpl(res);
 	}
 
 	@Override
 	public ResponseList<Wiki> createWikisList(final HttpResponse res) throws MoefouException {
 		return WikiJSONImpl.createWikisList(res);
+	}
+
+	Configuration getConfiguration() {
+		return conf;
 	}
 
 }

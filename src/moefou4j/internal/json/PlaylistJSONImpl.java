@@ -1,16 +1,11 @@
 package moefou4j.internal.json;
 
 import static moefou4j.internal.util.Moefou4JInternalParseUtil.getBoolean;
-import static moefou4j.internal.util.Moefou4JInternalParseUtil.getInt;
 import static moefou4j.internal.util.Moefou4JInternalParseUtil.getRawString;
-
-import java.util.Arrays;
-
 import moefou4j.MoefouException;
 import moefou4j.Playlist;
 import moefou4j.PlaylistItem;
 import moefou4j.http.HttpResponse;
-import moefou4j.internal.json.MoefouResponseImpl.InformationImpl;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -62,9 +57,9 @@ final class PlaylistJSONImpl extends ResponseListImpl<PlaylistItem> implements P
 	static class PlaylistInformationImpl extends PageableInformationImpl implements PlaylistInformation {
 
 		private static final long serialVersionUID = 8390363206544179609L;
-		private boolean mayHaveNext;
-		private boolean isTarget;
-		private String nextUrl;
+		private final boolean mayHaveNext;
+		private final boolean isTarget;
+		private final String nextUrl;
 
 		PlaylistInformationImpl(final JSONObject json) throws MoefouException {
 			super(json);

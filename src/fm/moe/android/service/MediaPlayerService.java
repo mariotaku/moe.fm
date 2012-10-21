@@ -10,21 +10,26 @@ import android.media.MediaPlayer.OnBufferingUpdateListener;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnInfoListener;
-import android.media.MediaPlayer.OnPreparedListener;
 import android.media.MediaPlayer.OnSeekCompleteListener;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.IBinder;
-import android.os.RemoteException;
+import android.util.Log;
+import fm.moe.android.BuildConfig;
 import fm.moe.android.Constants;
 import fm.moe.android.IMediaPlayerService;
 
 public class MediaPlayerService extends Service implements Constants, OnBufferingUpdateListener, OnCompletionListener,
-		OnErrorListener, OnInfoListener, OnPreparedListener, OnSeekCompleteListener {
+		OnErrorListener, OnInfoListener, OnSeekCompleteListener {
 
 	private MediaPlayer mMediaPlayer;
 
 	private final ServiceStub mBinder = new ServiceStub(this);
 
-	private boolean mPlayerPrepared;
+	private boolean mIsPrepared;
+	private boolean mIsPreparing;
+
+	private OpenMediaTask mOpenMediaTask;
 
 	public void attachAuxEffect(final int effectId) {
 		if (mMediaPlayer == null) return;
@@ -58,7 +63,11 @@ public class MediaPlayerService extends Service implements Constants, OnBufferin
 
 	public boolean isPrepared() {
 		if (mMediaPlayer == null) return false;
-		return mPlayerPrepared;
+		return mIsPrepared;
+	}
+
+	public boolean isPreparing() {
+		return mIsPreparing;
 	}
 
 	@Override
@@ -92,7 +101,6 @@ public class MediaPlayerService extends Service implements Constants, OnBufferin
 		mMediaPlayer.setOnCompletionListener(this);
 		mMediaPlayer.setOnErrorListener(this);
 		mMediaPlayer.setOnInfoListener(this);
-		mMediaPlayer.setOnPreparedListener(this);
 		mMediaPlayer.setOnSeekCompleteListener(this);
 	}
 
@@ -125,21 +133,21 @@ public class MediaPlayerService extends Service implements Constants, OnBufferin
 	}
 
 	@Override
-	public void onPrepared(final MediaPlayer mp) {
-		if (mMediaPlayer == null) return;
-		final Intent intent = new Intent(BROADCAST_ON_PREPARED);
-		intent.putExtra(INTENT_KEY_AUDIO_SESSION_ID, getAudioSessionId());
-		sendBroadcast(intent);
-		mPlayerPrepared = true;
-	}
-
-	@Override
 	public void onSeekComplete(final MediaPlayer mp) {
 		if (mMediaPlayer == null) return;
 		final Intent intent = new Intent(BROADCAST_ON_SEEK_COMPLETE);
 		intent.putExtra(INTENT_KEY_AUDIO_SESSION_ID, getAudioSessionId());
 		sendBroadcast(intent);
 
+	}
+
+	public boolean open(final String path, final boolean play_now) {
+		if (mOpenMediaTask != null) {
+			mOpenMediaTask.cancel(true);
+		}
+		mOpenMediaTask = new OpenMediaTask(this, path, play_now);
+		mOpenMediaTask.execute();
+		return true;
 	}
 
 	public boolean pause() {
@@ -160,26 +168,14 @@ public class MediaPlayerService extends Service implements Constants, OnBufferin
 		if (mMediaPlayer == null) return false;
 		try {
 			mMediaPlayer.prepare();
-			mPlayerPrepared = true;
+			setPrepared(true);
 			return true;
 		} catch (final IllegalStateException e) {
 			e.printStackTrace();
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
-		mPlayerPrepared = false;
-		return false;
-	}
-
-	public boolean prepareAsync() {
-		if (mMediaPlayer == null) return false;
-		try {
-			mMediaPlayer.prepareAsync();
-			return true;
-		} catch (final IllegalStateException e) {
-			e.printStackTrace();
-		}
-		mPlayerPrepared = false;
+		setPrepared(false);
 		return false;
 	}
 
@@ -192,7 +188,7 @@ public class MediaPlayerService extends Service implements Constants, OnBufferin
 	public void reset() {
 		if (mMediaPlayer == null) return;
 		mMediaPlayer.reset();
-		mPlayerPrepared = false;
+		setPrepared(false);
 	}
 
 	public boolean seekTo(final int msec) {
@@ -231,12 +227,15 @@ public class MediaPlayerService extends Service implements Constants, OnBufferin
 
 	public boolean setDataSource(final String path) {
 		if (mMediaPlayer == null) return false;
+		if (BuildConfig.DEBUG) {
+			Log.d(LOGTAG, "Loading media " + path);
+		}
 		if (isPlaying()) {
 			stop();
 		}
 		reset();
 		try {
-			mMediaPlayer.setDataSource(path);
+			mMediaPlayer.setDataSource(this, Uri.parse(path));
 			return true;
 		} catch (final IllegalStateException e) {
 			e.printStackTrace();
@@ -247,7 +246,7 @@ public class MediaPlayerService extends Service implements Constants, OnBufferin
 		} catch (final SecurityException e) {
 			e.printStackTrace();
 		}
-		mPlayerPrepared = false;
+		setPrepared(false);
 		return false;
 	}
 
@@ -293,6 +292,68 @@ public class MediaPlayerService extends Service implements Constants, OnBufferin
 		return false;
 	}
 
+	private void setPrepared(final boolean prepared) {
+		synchronized (this) {
+			mIsPrepared = prepared;
+			if (prepared) {
+				final Intent intent = new Intent(BROADCAST_ON_PREPARED);
+				intent.putExtra(INTENT_KEY_AUDIO_SESSION_ID, getAudioSessionId());
+				sendBroadcast(intent);
+			}
+		}
+	}
+
+	private void setPreparing(final boolean preparing) {
+		synchronized (this) {
+			mIsPreparing = preparing;
+			sendBroadcast(new Intent(BROADCAST_ON_PREPARE_STATE_CHANGE));
+		}
+	}
+
+	static final class OpenMediaTask extends AsyncTask<Void, Void, Boolean> {
+
+		private final MediaPlayerService service;
+		private final String path;
+		private final boolean play_now;
+
+		OpenMediaTask(final MediaPlayerService service, final String path, final boolean play_now) {
+			this.service = service;
+			this.path = path;
+			this.play_now = play_now;
+		}
+
+		@Override
+		protected Boolean doInBackground(final Void... args) {
+			service.setDataSource(path);
+			return service.prepare();
+		}
+
+		@Override
+		protected void onCancelled() {
+			service.setPreparing(false);
+			service.setPrepared(false);
+			super.onCancelled();
+		}
+
+		@Override
+		protected void onPostExecute(final Boolean result) {
+			service.setPreparing(false);
+			service.setPrepared(true);
+			if (play_now) {
+				service.start();
+			}
+			super.onPostExecute(result);
+		}
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			service.setPrepared(false);
+			service.setPreparing(true);
+		}
+
+	}
+
 	static final class ServiceStub extends IMediaPlayerService.Stub {
 
 		final WeakReference<MediaPlayerService> mService;
@@ -333,24 +394,23 @@ public class MediaPlayerService extends Service implements Constants, OnBufferin
 		}
 
 		@Override
-		public boolean isPrepared() throws RemoteException {
+		public boolean isPrepared() {
 			return mService.get().isPrepared();
+		}
+
+		@Override
+		public boolean isPreparing() {
+			return mService.get().isPreparing();
+		}
+
+		@Override
+		public boolean open(final String path, final boolean play_now) {
+			return mService.get().open(path, play_now);
 		}
 
 		@Override
 		public boolean pause() {
 			return mService.get().pause();
-		}
-
-		@Override
-		public boolean prepare() {
-			return mService.get().prepare();
-		}
-
-		@Override
-		public boolean prepareAsync() {
-			return mService.get().prepareAsync();
-
 		}
 
 		@Override
@@ -384,12 +444,6 @@ public class MediaPlayerService extends Service implements Constants, OnBufferin
 		@Override
 		public void setAuxEffectSendLevel(final float level) {
 			mService.get().setAuxEffectSendLevel(level);
-		}
-
-		@Override
-		public boolean setDataSource(final String path) {
-			return mService.get().setDataSource(path);
-
 		}
 
 		@Override

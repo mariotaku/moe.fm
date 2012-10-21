@@ -15,8 +15,11 @@
  */
 package moefou4j;
 
+import moefou4j.api.FavoriteMethods;
 import moefou4j.api.MoeFMMethods;
 import moefou4j.api.SearchMethods;
+import moefou4j.api.SubMethods;
+import moefou4j.api.UserMethods;
 import moefou4j.api.WikiMethods;
 import moefou4j.auth.OAuthSupport;
 
@@ -24,5 +27,6 @@ import moefou4j.auth.OAuthSupport;
  * @author Mariotaku Lee <mariotaku.lee@gmail.com>
  * @since Moefou4J 0.1
  */
-public interface Moefou extends OAuthSupport, MoefouBase, WikiMethods, SearchMethods, MoeFMMethods {
+public interface Moefou extends OAuthSupport, MoefouBase, WikiMethods, SubMethods, UserMethods, SearchMethods,
+		FavoriteMethods, MoeFMMethods {
 }

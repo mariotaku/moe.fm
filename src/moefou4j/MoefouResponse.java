@@ -22,7 +22,7 @@ import java.util.HashMap;
 public interface MoefouResponse extends Serializable {
 
 	public Information getInformation();
-	
+
 	public interface Information extends Serializable {
 
 		/**
