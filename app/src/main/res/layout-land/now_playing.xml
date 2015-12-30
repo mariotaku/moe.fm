@@ -1,0 +1,58 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="horizontal">
+
+	<FrameLayout
+		android:id="@+id/album_cover_container"
+		android:layout_width="@dimen/album_cover_size"
+		android:layout_height="@dimen/album_cover_size"
+		android:layout_marginTop="@dimen/padding_small"
+		android:background="@drawable/ic_album_cover">
+
+		<fm.moe.android.view.RoundCorneredImageView
+			android:id="@+id/album_cover"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:radius="4dp"
+			android:src="@drawable/ic_mp_albumart_unknown"/>
+
+		<fm.moe.android.view.RoundCorneredImageView
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:radius="4dp"
+			android:src="@drawable/ic_mp_albumart_mask"/>
+	</FrameLayout>
+
+	<RelativeLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:padding="@dimen/padding_large">
+
+		<fm.moe.android.view.MarqueeTextView
+			android:id="@+id/title"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentLeft="true"
+			android:layout_alignParentRight="true"
+			android:layout_alignParentTop="true"
+			android:gravity="center"
+			android:singleLine="true"
+			android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+		<TextView
+			android:id="@+id/artist"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentLeft="true"
+			android:layout_alignParentRight="true"
+			android:layout_below="@+id/title"
+			android:layout_marginTop="@dimen/padding_small"
+			android:gravity="center"
+			android:singleLine="true"
+			android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+		<include layout="@layout/now_playing_controls"/>
+	</RelativeLayout>
+
+</LinearLayout>
