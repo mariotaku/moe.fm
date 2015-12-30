@@ -1,0 +1,41 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+	<item android:title="@string/theme">
+		<menu>
+			<group
+				android:id="@+id/theme_group"
+				android:checkableBehavior="single">
+				<item
+					android:id="@+id/theme_default"
+					android:title="@string/theme_default"/>
+				<item
+					android:id="@+id/theme_sandy"
+					android:title="@string/theme_sandy"/>
+				<item
+					android:id="@+id/theme_gray"
+					android:title="@string/theme_gray"/>
+				<item
+					android:id="@+id/theme_woody"
+					android:title="@string/theme_woody"/>
+				<item
+					android:id="@+id/theme_graphited"
+					android:title="@string/theme_graphited"/>
+			</group>
+		</menu>
+	</item>
+	<item
+		android:id="@+id/equalizer"
+		android:title="@string/equalizer"/>
+	<item
+		android:id="@+id/logout"
+		android:title="@string/logout"/>
+	<item
+		android:id="@+id/settings"
+		android:showAsAction="never"
+		android:title="@string/settings"/>
+	<item
+		android:id="@+id/quit"
+		android:showAsAction="never"
+		android:title="@string/quit"/>
+
+</menu>
