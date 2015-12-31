@@ -14,14 +14,22 @@
 		android:label="@string/app_name"
 		android:theme="@style/Theme.Initial">
 
+        <activity
+            android:name=".activity.MainActivity"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
 		<activity
 			android:name=".activity.NowPlayingActivity"
 			android:launchMode="singleTop">
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN"/>
+			<!--intent-filter>
+				<action android:name="android.intent.action.RUN"/>
 
-				<category android:name="android.intent.category.LAUNCHER"/>
-			</intent-filter>
+				<category android:name="android.intent.category.APP_MUSIC"/>
+			</intent-filter-->
 		</activity>
 		<activity
 			android:name=".activity.LoginActivity"
