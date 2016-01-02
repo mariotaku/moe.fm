@@ -1,4 +1,0 @@
-<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-	android:dither="true"
-	android:src="@drawable/tile_cross_grid"
-	android:tileMode="repeat"/>
