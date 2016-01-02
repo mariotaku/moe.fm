@@ -28,14 +28,19 @@ public class MainActivity extends Activity {
 			if (fragment == null || !fragment.isVisible()) {
 				new NetworkConfirmDialogFragment().show(fm, FRAGMENT_TAG_NETWORK_CONFIRM);
 			}
-		} else {
-			final Intent intent = new Intent(this, NowPlayingActivity.class);
-			startActivity(intent);
 		}
-
 	}
 
-	static final class NetworkConfirmDialogFragment extends DialogFragment implements DialogInterface.OnClickListener {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        final Intent intent = new Intent(this, NowPlayingActivity.class);
+        startActivity(intent);
+    }
+
+    static final class NetworkConfirmDialogFragment extends DialogFragment implements DialogInterface.OnClickListener {
+
+        NetworkConfirmDialogFragment(){}
 
 		@Override
 		public void onClick(final DialogInterface dialog, final int which) {

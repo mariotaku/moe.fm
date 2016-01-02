@@ -30,24 +30,16 @@ public class BasePreferenceActivity extends PreferenceActivity implements Consta
 		boolean show_anim = false;
 		try {
 			final float transition_animation = Settings.System.getFloat(getContentResolver(),
-					Settings.System.TRANSITION_ANIMATION_SCALE);
+					Settings.Global.TRANSITION_ANIMATION_SCALE);
 			show_anim = transition_animation > 0.0;
 		} catch (final SettingNotFoundException e) {
 			e.printStackTrace();
 		}
 		final int enter_anim = show_anim ? android.R.anim.fade_in : 0;
 		final int exit_anim = show_anim ? android.R.anim.fade_out : 0;
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR) {
-			overridePendingTransition(enter_anim, exit_anim);
-		} else {
-			getWindow().setWindowAnimations(0);
-		}
+		overridePendingTransition(enter_anim, exit_anim);
 		finish();
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR) {
-			overridePendingTransition(enter_anim, exit_anim);
-		} else {
-			getWindow().setWindowAnimations(0);
-		}
+		overridePendingTransition(enter_anim, exit_anim);
 		startActivity(getIntent());
 	}
 
